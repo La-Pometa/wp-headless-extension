@@ -9,10 +9,6 @@ function wpheadless_jscomposer_load_module($modules)
 }
 
 
-
-
-
-
 class WPHeadlessJSComposer extends WPHeadlessModules
 {
 

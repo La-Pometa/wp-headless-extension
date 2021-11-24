@@ -6,7 +6,11 @@ Description: A simple wordpress headless plugin to make your wordpress headless 
 Version: 0.0.1
 Author: La Pometa
 Author URI: https://github.com/La-Pometa
+<<<<<<< HEAD
 GitHub Plugin URI: https://github.com/La-Pometa/wp-headless
+=======
+GitHub Plugin URI: https://github.com/La-Pometa/wp-headless-advanced
+>>>>>>> c987e7b19740d7b8a789577e2532c4cb424ad95e
 License: GPL2
 */
 /*
@@ -30,69 +34,77 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 require_once("includes/common.php");
 
 if (!class_exists('WP_Headless')) {
-	class WP_Headless
-	{
-		/**
-		 * Construct the plugin object
-		 */
-		public function __construct()
-		{
-			
-			// Initialize Settings
-			require_once(sprintf("%s/modules/module.php", dirname(__FILE__)));
-			$this->Modules=new WPHeadlessModules();
+    class WP_Headless
+    {
+        /**
+         * @var IntegrationsLoader
+         */
+        private IntegrationsLoader $Integrations;
+        /**
+         * @var WPHeadlessModules
+         */
+        private WPHeadlessModules $Modules;
 
-			if ( get_array_value($_GET,"debug",false) !== false ) {
-				$this->Modules->debug=true;
-			}
+        /**
+         * Construct the plugin object
+         */
+        public function __construct()
+        {
 
-			require_once(sprintf("%s/modules/vendor.class.php", dirname(__FILE__)));
-			$this->Vendors=new WPHeadlessVendors();
+            // Initialize Settings
+            require_once(sprintf("%s/modules/module.php", dirname(__FILE__)));
+            $this->Modules = new WPHeadlessModules();
+
+            if (get_array_value($_GET, "debug", false) !== false) {
+                $this->Modules->debug = true;
+            }
+
+            require_once(sprintf("%s/modules/IntegrationsLoader.php", dirname(__FILE__)));
+            $this->Integrations = new IntegrationsLoader();
+
+            //Carrega Vendors
+            $this->Integrations->load();
 
 
-			//Carrega Vendors
-			$this->Vendors->load();
+            //Carrega Mòduls + Vendor Mòduls
+            $this->Modules->load();
 
+            $plugin = plugin_basename(__FILE__);
+            add_filter("plugin_action_links_$plugin", array($this, 'plugin_settings_link'));
+        } // END public function __construct
 
-			//Carrega Mòduls + Vendor Mòduls
-			$this->Modules->load();
+        /**
+         * Activate the plugin
+         */
+        public static function activate()
+        {
+            // Do nothing
+        } // END public static function activate
 
-			$plugin = plugin_basename(__FILE__);
-			add_filter("plugin_action_links_$plugin", array($this, 'plugin_settings_link'));
-		} // END public function __construct
+        /**
+         * Deactivate the plugin
+         */
+        public static function deactivate()
+        {
+            // Do nothing
+        } // END public static function deactivate
 
-		/**
-		 * Activate the plugin
-		 */
-		public static function activate()
-		{
-			// Do nothing
-		} // END public static function activate
-
-		/**
-		 * Deactivate the plugin
-		 */
-		public static function deactivate()
-		{
-			// Do nothing
-		} // END public static function deactivate
-
-		// Add the settings link to the plugins page
-		function plugin_settings_link($links)
-		{
-			$settings_link = '<a href="options-general.php?page=wp_headless">Settings</a>';
-			array_unshift($links, $settings_link);
-			return $links;
-		}
-	} // END class WP_Plugin_Template
+        // Add the settings link to the plugins page
+        function plugin_settings_link($links)
+        {
+            $settings_link = '<a href="options-general.php?page=wp_headless">Settings</a>';
+            array_unshift($links, $settings_link);
+            return $links;
+        }
+    } // END class WP_Plugin_Template
 } // END if(!class_exists('WP_Plugin_Template'))
 
 if (class_exists('WP_Headless')) {
-	// Installation and uninstallation hooks
-	register_activation_hook(__FILE__, array('WP_Headless', 'activate'));
-	register_deactivation_hook(__FILE__, array('WP_Headless', 'deactivate'));
+    // Installation and uninstallation hooks
+    register_activation_hook(__FILE__, array('WP_Headless', 'activate'));
+    register_deactivation_hook(__FILE__, array('WP_Headless', 'deactivate'));
 
-	// instantiate the plugin class
-	$wp_plugin_template = new WP_Headless();
+    // instantiate the plugin class
+    $wp_plugin_template = new WP_Headless();
 }
 

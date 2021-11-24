@@ -1,59 +1,29 @@
 <?php
+require_once "Integration.php";
 
-
-add_filter("wpheadless/modules/load", "wpheadless_polylang_load_module");
-function wpheadless_polylang_load_module($modules)
-{
-    $modules["polylang"] = "WPHeadlessPolyLang";
-    return $modules;
-}
-
-
-
-
-class WPHeadlessPolyLang extends WPHeadlessModules
+class WPHeadlessPolyLang extends Integration
 {
 
-    static $instance = false;
+    static bool $instance = false;
 
-    public function __construct()
+    public function init()
     {
         // Check if polylang is installed
         require_once ABSPATH . 'wp-admin/includes/plugin.php';
         if (!is_plugin_active('polylang/polylang.php')) {
             return;
         }
-        if (!get_option('rest-lang')) {
-            return;
-        }
-        add_action('rest_api_init', array($this, 'rest_init'), 0);
-        add_action('init', array($this, 'init'), 0);
-        add_action('rest_api_init', array($this, '_change_rest_lang_server'), 100, 3);
 
+        add_action('rest_api_init', array($this, 'rest_init'), 0);
+        add_action('rest_api_init', array($this, '_change_rest_lang_server'), 100, 3);
 
         add_action("wpheadless/content/init", array($this, "register_api_field"));
     }
 
 
-    public function getTheContent($data)
-    {
-        $content = get_post($data['id'])->post_content;
-
-        if (empty($content)) {
-            return null;
-        }
-
-        return $content;
-    }
-    public function init()
-    {
-    }
-
     public function rest_init()
     {
         global $polylang;
-
-        /*         echo "<br> REST INIT : <pre>" . print_r($_GET, true) . "</pre>"; */
 
         if (isset($_GET['lang'])) {
             $default = pll_default_language();
@@ -88,12 +58,7 @@ class WPHeadlessPolyLang extends WPHeadlessModules
     public function register_api_field($post_type)
     {
 
-        switch ($post_type) {
-                //case "post": $post_type_rest="posts";break;
-                //case "page": $post_type_rest="pages";break;
-            default:
-                $post_type_rest = $post_type;
-        }
+        $post_type_rest = $post_type;
         $this->console("Binding 'rest_" . $post_type_rest . "_query' ");
         add_filter('rest_' . $post_type_rest . '_query', array($this, '_change_rest_lang'), 10, 2);
 
@@ -137,15 +102,15 @@ class WPHeadlessPolyLang extends WPHeadlessModules
         );
     }
 
-    public function get_current_lang($object)
+    public function get_current_lang($object): bool|string
     {
-        return pll_get_post_language($object['id'], 'slug');
+        return pll_get_post_language($object['id']);
     }
 
 
-    public function get_current_taxonomy_lang($object)
+    public function get_current_taxonomy_lang($object): bool|string
     {
-        return pll_get_term_language($object['id'], 'slug');
+        return pll_get_term_language($object['id']);
     }
 
     public function get_translations($object)
@@ -156,7 +121,7 @@ class WPHeadlessPolyLang extends WPHeadlessModules
 
             $post = get_post($translation);
             $item = array(
-                'locale' => pll_get_post_language($translation, 'slug'),
+                'locale' => pll_get_post_language($translation),
                 'id' => $translation,
                 'slug' => $post->post_name,
                 'title' => get_the_title($translation),
@@ -176,17 +141,15 @@ class WPHeadlessPolyLang extends WPHeadlessModules
 
         add_filter('wpseo_frontend_presentation', function ($presentation, $context) {
 
-            /*             echo "<pre>" . print_r($presentation->model, true) . "</pre>"; */
-            /*             $presentation->locale = pll_current_language('slug'); */
             return $presentation;
         }, 100, 2);
     }
+
     function _change_rest_lang($args, $request)
     {
 
-        //echo "<br> REQUEST: <pre>" . print_r($request, true) . "</pre>";
         $params = $request->get_params();
-        $max = max((int) $request->get_param('custom_per_page'), 200);
+        $max = max((int)$request->get_param('custom_per_page'), 200);
         $lang = get_array_value($params, "lang", false);
         if (!$lang) {
             if (function_exists("pll_default_language")) {
@@ -200,9 +163,6 @@ class WPHeadlessPolyLang extends WPHeadlessModules
             $_GET["translate"] = $lang;
         }
 
-        //echo "<br> POST: <pre>".print_r($_GET,true)."</pre>";
-
-        /*         echo "<br> ARGS: <pre>" . print_r($args, true) . "</pre>"; */
         return $args;
     }
 }
@@ -214,9 +174,8 @@ function wpheadless_vendor_polylang_replace_lang($vars)
     $translate = get_array_value($vars, "translate", false);
     $lang = get_array_value($vars, "lang", false);
 
-    if ($translate  && !$lang) {
+    if ($translate && !$lang) {
         $_GET["lang"] = $translate;
-        $lang = $lang;
     }
 
     $lang = get_array_value($vars, "lang", pll_default_language());
