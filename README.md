@@ -1,0 +1,1 @@
+# WP Headless plugin
