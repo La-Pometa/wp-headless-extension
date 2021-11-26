@@ -11,6 +11,7 @@ License: GPL2
 */
 /*
 Copyright 2021  Jordi Gómez  (email : gnugomez@gmail.com)
+Copyright 2021  Jordi Fonfreda  (email : suport@glapometa.com)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License, version 2, as
