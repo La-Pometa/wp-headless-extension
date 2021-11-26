@@ -6,11 +6,7 @@ Description: A simple wordpress headless plugin to make your wordpress headless 
 Version: 0.0.1
 Author: La Pometa
 Author URI: https://github.com/La-Pometa
-<<<<<<< HEAD
 GitHub Plugin URI: https://github.com/La-Pometa/wp-headless
-=======
-GitHub Plugin URI: https://github.com/La-Pometa/wp-headless-advanced
->>>>>>> c987e7b19740d7b8a789577e2532c4cb424ad95e
 License: GPL2
 */
 /*
