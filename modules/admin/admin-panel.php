@@ -117,7 +117,9 @@ class WPHeadlessAdminPanel extends WPHeadlessModules
         if ($callback) {
             add_action("wpheadless/settings/tab/content", $callback);
         }
+        do_action("wpheadless/settings/tab/content/before", $this);
         do_action("wpheadless/settings/tab/content", $this);
+        do_action("wpheadless/settings/tab/content/after", $this);
         do_action("wpheadless/settings/css", $sub);
         do_action("wpheadless/settings/js", $sub);
 

@@ -70,6 +70,9 @@ class WPHeadlessPolylangAdmin extends Integration {
         add_action("wpheadless/settings/input/start",array($this,"_input_start_wrapper"),0);
         add_action("wpheadless/settings/input/end",array($this,"_input_end_wrapper"),2500);
 
+        // Afegir Selector d'idioma dins de Settings
+
+        add_action("wpheadless/settings/tab/content/before",array($this,"_settings_before_polylang_selector"));
 
         // Modificar sections per a multiidioma 
         add_filter("wpheadless/settings/tab/sections",array($this,"_settings_section"),2500);
@@ -134,4 +137,39 @@ class WPHeadlessPolylangAdmin extends Integration {
 
         return $atts;
     }
+
+
+
+
+    function _settings_before_polylang_selector()
+    {
+    
+        $html = "";
+        if (function_exists("pll_default_language")) {
+            $the_lang = get_array_value($_GET, "lang", pll_default_language());
+            $langs = pll_languages_list(array('fields' => array()));
+            $list = array();
+            foreach ($langs as $lang) {
+                $slug = get_object_value($lang, "slug");
+                $item = array();
+                $item["id"] = get_object_value($lang, "term_id");
+                $item["name"] = get_object_value($lang, "name");
+                $item["flag"] = get_object_value($lang, "flag");
+                $list[$slug] = $item;
+            }
+    
+            foreach ($list as $slug => $info) {
+                $html .= '<li class="wphls-language-pill' . ($the_lang == $slug ? ' selected' : '') . '"><a href="#' . $slug . '">' . get_array_value($info, "flag", "") . ' ' . get_array_value($info, "name", $slug) . '</a></li>';
+            }
+    
+            if ($html) {
+                $html = '<ul class="wphls-language-selector">' . $html . '</ul>';
+            }
+        }
+        echo $html;
+    }
+    
+
+
+
 }
