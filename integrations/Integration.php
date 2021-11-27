@@ -5,9 +5,25 @@ abstract class Integration implements IntegrationInterface
 {
     public bool $debug = false;
 
+    private string $_id;
+    public $_version = "0.0.0";
+    public $_title = "NoTitleIntegration";
+    public $_loaded = false;
+    
+
+
     public function __construct()
     {
+
+        $this->_id = "id-not-defined";
+        $this->_version="0.0.0";
+        $this->_title = "Integration::NoTitle";
+        $this->_loaded = false;
+
+        $this->integration_id = $integration_id;
         $this->init();
+
+
     }
 
     public function console($string)
@@ -16,4 +32,21 @@ abstract class Integration implements IntegrationInterface
             echo $string;
         }
     }
+
+    public function info($modules) {
+
+        $modules[$this->_id]=array(
+            "id"=>$this->_id,
+            "version"=>$this->_version,
+            "title"=>$this->_title,
+            "loaded"=>$this->loaded
+        );
+
+        return $modules;
+
+    }
+
+
+
+    
 }

@@ -1,5 +1,40 @@
 <?php
 
+/*-
+
+    Plugin ID: whpi-wpbakery
+    Plugin Name: WPHeadless-Integration WPBakery/Visual Composer
+    Plugin URI: https://www.lapometa.com/headless
+    Description: Integració WPBakery/Visual Composer amb API REST
+    Version: 0.0.1
+    Author: WPHeadless
+    Text Domain: wpheadlessltd
+    RequiresPHP: 7.4.2
+
+
+-*/
+
+define("WPHI_INTEGRATION_WPBAKERY_ID","wphi-polylang");
+
+add_filter("wpheadless/integrations/info","wpheadless_rest_modules_vendor_wpbakery_admin_info");
+function wpheadless_rest_modules_vendor_wpbakery_admin_info($modules) {
+
+    $info = get_plugin_data(__FILE__);
+
+    $modules[WPHI_INTEGRATION_WPBAKERY_ID] = array(
+        "id"=>WPHI_INTEGRATION_WPBAKERY_ID,
+        "title"=>get_array_value($info,"Name",false),
+        "version"=>get_array_value($info,"Version","0.0.1"),
+        "description"=>get_array_value($info,"Description",""),
+        "type"=>"rest",
+        "loaded"=>false,
+    );
+   
+    return $modules;
+
+}
+
+
 
 add_filter("wpheadless/modules/load", "wpheadless_jscomposer_load_module");
 function wpheadless_jscomposer_load_module($modules)

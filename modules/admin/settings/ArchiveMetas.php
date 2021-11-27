@@ -1,5 +1,45 @@
 <?php
 
+
+
+
+/*-
+
+    Plugin ID: whpi-archivemetas
+    Plugin Name: WPHeadless-ArchiveMetas
+    Plugin URI: https://www.lapometa.com/headless
+    Description: Permeteix establir SEO Metas per Post Type Archive
+    Version: 0.0.1
+    Author: WPHeadless
+    Text Domain: wpheadlessltd
+    RequiresPHP: 7.4.2
+
+
+-*/
+
+define("WPHI_INTEGRATION_ARCHIVEMETAS_ID","wphi-archivemetas");
+
+add_filter("wpheadless/integrations/info","wpheadless_rest_modules_vendor_archivemetas_admin_info");
+function wpheadless_rest_modules_vendor_archivemetas_admin_info($modules) {
+
+    $info = get_plugin_data(__FILE__);
+
+    $modules[WPHI_INTEGRATION_ARCHIVEMETAS_ID] = array(
+        "id"=>WPHI_INTEGRATION_ARCHIVEMETAS_ID,
+        "title"=>get_array_value($info,"Name",false),
+        "version"=>get_array_value($info,"Version","0.0.1"),
+        "description"=>get_array_value($info,"Description",""),
+        "type"=>"admin",
+        "loaded"=>false,
+    );
+   
+    return $modules;
+
+}
+
+
+
+
 class ArchiveMetas
 {
     public static function render(WPHeadlessAdminPanel $adminPanel)

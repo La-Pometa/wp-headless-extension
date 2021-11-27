@@ -3,7 +3,7 @@
 /*-
 
     Plugin ID: whpi-polylang-admin
-    Plugin Name: WPHeadless-Integration Polylang - Administrator
+    Plugin Name: WPHeadless-Integration Polylang - ThemeSettings
     Plugin URI: https://www.lapometa.com/headless
     Description: Integració de AdminPanel-ThemeSettings per a Multiidioma amb Polylang
     Version: 0.0.3
@@ -20,13 +20,11 @@ define("WPHI_INTEGRATION_POLYLANGADMIN_ID","wphi-polylang-admin");
 add_filter("wpheadless/admin/modules","wpheadless_themesettings_modules_vendor_polylang_admin");
 
 function wpheadless_themesettings_modules_vendor_polylang_admin($modules) {
-
     //Afegir 'whpi-polylang-admin' a AdminModules
     $modules[WPHI_INTEGRATION_POLYLANGADMIN_ID]=array(
         "file"=>__FILE__,
         "class"=>"WPHeadlessPolylangAdmin"
     );
-
     return $modules;
 }
 
@@ -40,6 +38,7 @@ function wpheadless_themesettings_modules_vendor_polylang_admin_info($modules) {
         "title"=>get_array_value($info,"Name",false),
         "version"=>get_array_value($info,"Version","0.0.1"),
         "description"=>get_array_value($info,"Description",""),
+        "type"=>"admin",
         "loaded"=>false,
     );
    

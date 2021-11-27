@@ -5,12 +5,16 @@ add_filter("wpheadless/admin/modules", "wpheadless_adminpanel_load_module");
 
 function wpheadless_adminpanel_load_module($modules)
 {
-    $modules["adminpanel"] = "WPHeadlessAdminPanel";
+    $modules["adminpanel"] = array(
+        "class"=>"WPHeadlessAdminPanel",
+        "file"=>__FILE__
+    );
+
     return $modules;
 }
 
-require_once "settings/Integrations.php";
 require_once "settings/General.php";
+require_once "settings/Integrations.php";
 require_once "settings/ArchiveMetas.php";
 
 class WPHeadlessAdminPanel extends WPHeadlessModules
@@ -18,6 +22,7 @@ class WPHeadlessAdminPanel extends WPHeadlessModules
 
     private bool $settings_options;
     private string $settings_option_name;
+    private array $settings_modules;
 
     /**
      * Construct the plugin object
@@ -28,6 +33,13 @@ class WPHeadlessAdminPanel extends WPHeadlessModules
         $this->settings_options = false;
         $this->settings_option_name = "wpheadless_settings";
         add_action('admin_menu', array($this, 'add_menu'));
+
+        //Carregar el mòduls de AdminPanel
+        $this->settings_modules["general"] = new General();
+        $this->settings_modules["integrations"] = new Integrations();
+        $this->settings_modules["archive-meta-cpts"] = new ArchiveMetas();
+        
+
 
     } // END public function __construct
 
@@ -42,13 +54,22 @@ class WPHeadlessAdminPanel extends WPHeadlessModules
         );
 
     }
-
+    function is_integration_enabled($integration_id) {
+       return  $this->settings_modules["integrations"]->is_integration_enabled($integration_id);
+    }
     function get_tabs($tabs = array())
     {
-        $tabs["general"] = array("title" => __("General", "wpheadlessltd"), "callback" => array(General::class, "render"));
-        $tabs["integrations"] = array("title" => __("Integraciones", "wpheadlessltd"), "callback" => array(Integrations::class, "render"));
-        $tabs["archive-meta-cpts"] = array("title" => __("MetaSEO en páginas de archivo", "wpheadlessltd"), "callback" => array(ArchiveMetas::class, "render"));
-        return apply_filters("wpheadless/settings/tabs", $tabs);
+        // Pestanyes dels mòduls de AdminPanel
+        $tabs["general"] = array("title" => __("General", "wpheadlessltd"), "callback" => array($this->settings_modules["general"], "render"));
+        $tabs["integrations"] = array("title" => __("Integraciones", "wpheadlessltd"), "callback" => array($this->settings_modules["integrations"], "render"));
+       
+        if ( $this->is_integration_enabled("wphi-archivemetas")) {
+            $tabs["archive-meta-cpts"] = array("title" => __("MetaSEO en páginas de archivo", "wpheadlessltd"), "callback" => array($this->settings_modules["archive-meta-cpts"], "render"));
+        }
+        // Pestanyes de mòduls de AdminSettings
+        $tabs = apply_filters("wpheadless/settings/tabs", $tabs);
+
+        return $tabs;
     }
 
     function page()
