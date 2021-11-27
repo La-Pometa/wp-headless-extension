@@ -37,6 +37,7 @@ if (!class_exists('WP_Headless')) {
          * @var IntegrationsLoader
          */
         private IntegrationsLoader $Integrations;
+
         /**
          * @var WPHeadlessModules
          */
@@ -68,6 +69,16 @@ if (!class_exists('WP_Headless')) {
 
             $plugin = plugin_basename(__FILE__);
             add_filter("plugin_action_links_$plugin", array($this, 'plugin_settings_link'));
+
+            $this->IntegrationsAdmin=false;
+            if ( is_admin()) {
+                // Estic a l'administrador? Carregar ThemeSettings 
+                $this->Integrations->loadAdmin();
+                $this->Integrations->loadAdminFilters();
+
+            }
+
+
         } // END public function __construct
 
         /**
@@ -95,6 +106,8 @@ if (!class_exists('WP_Headless')) {
         }
     } // END class WP_Plugin_Template
 } // END if(!class_exists('WP_Plugin_Template'))
+
+
 
 if (class_exists('WP_Headless')) {
     // Installation and uninstallation hooks

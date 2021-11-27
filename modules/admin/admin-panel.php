@@ -1,7 +1,7 @@
 <?php
 
 
-add_filter("wpheadless/modules/load", "wpheadless_adminpanel_load_module");
+add_filter("wpheadless/admin/modules", "wpheadless_adminpanel_load_module");
 
 function wpheadless_adminpanel_load_module($modules)
 {
@@ -162,6 +162,10 @@ class WPHeadlessAdminPanel extends WPHeadlessModules
         );
 
 
+        /*- Habilitar Multidioma : Polylang (TODO: WPML) -*/
+        $sections = apply_filters("wpheadless/settings/tab/sections",$sections);
+
+        
         foreach ($sections as $section_id => $section_data) {
 
             $section_title = get_array_value($section_data, "title", "NoTitle[" . $section_id . "]");
@@ -194,9 +198,13 @@ class WPHeadlessAdminPanel extends WPHeadlessModules
                         $field_description = get_array_value($field_data, "description", "");
                         $args = array(
                             "id" => $field_id,
+                            "field_data"=>$field_data,
                             "type" => get_array_value($field_data, "type", "text"),
                             "class" => get_array_value($field_data, "class", ""),
                         );
+
+                        do_action("wpheadless/settings/input/start",$args);
+
                         echo $this->input($args);
 
                         if ($field_description) {
@@ -206,11 +214,13 @@ class WPHeadlessAdminPanel extends WPHeadlessModules
                         if ($field_html) {
                             echo "<p>" . $field_html . "</p>";
                         }
+                        do_action("wpheadless/settings/input/end",$args);
 
 
                     }, // callback
                     $page, // page
-                    $section_id // section
+                    $section_id, // section
+                    apply_filters("wpheadless/settings/input/atts",array(),array("field_data"=>$field_data))
                 );
 
             }

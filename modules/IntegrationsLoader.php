@@ -4,14 +4,16 @@
 class IntegrationsLoader
 {
 
-    private string | bool $vendors_path;
+    private string $vendors_path;
     private array $integrations;
+    private array $integrationsAdmin;
 
 
     public function __construct()
     {
         $this->vendors_path = false;
         $this->integrations = array();
+        $this->integrationsAdmin = array();
     }
 
     public function load()
@@ -36,5 +38,26 @@ class IntegrationsLoader
         }
         return $this->vendors_path;
     }
+
+    /*- Carregar les integracions a la secció de l'administrador -*/
+
+    public function loadAdmin() {
+
+        $this->integrationsAdmin = apply_filters("wpheadless/admin/modules",array());
+        if ( !is_array($this->integrationsAdmin)) {
+            $this->integrationsAdmin=array();
+        }
+
+        foreach($this->integrationsAdmin as $integration_id => $integration_class) {
+            $this->integrationsAdmin[$integration_id]=new $integration_class();
+        }
+
+    }
+    public function loadAdminFilters() {
+        foreach($this->integrationsAdmin as $integration_id => $integration_class) {
+            $this->integrationsAdmin[$integration_id]->init();
+        }
+    }
+
 
 }
