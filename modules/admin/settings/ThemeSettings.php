@@ -167,7 +167,7 @@ class ThemeSettings
 
         $html = '<input type="text" value="" ' . $class_attr . '>';
 
-        $html = apply_filters("wpheadless/settings/input/html", $html, $args);
+        $html = apply_filters("wpheadless/themesettings/input/html", $html, $args);
 
 
         return $html;
@@ -189,7 +189,7 @@ class ThemeSettings
     
     
             /*- Habilitar Multidioma : Polylang (TODO: WPML) -*/
-            $sections = apply_filters("wpheadless/settings/tab/sections",$sections);
+            $sections = apply_filters("wpheadless/themesettings/tab/sections",$sections);
     
             
             foreach ($sections as $section_id => $section_data) {
@@ -229,7 +229,7 @@ class ThemeSettings
                                 "class" => get_array_value($field_data, "class", ""),
                             );
     
-                            do_action("wpheadless/settings/input/start",$args);
+                            do_action("wpheadless/themesettings/input/start",$args);
     
                             echo self::input($args);
     
@@ -240,13 +240,13 @@ class ThemeSettings
                             if ($field_html) {
                                 echo "<p>" . $field_html . "</p>";
                             }
-                            do_action("wpheadless/settings/input/end",$args);
+                            do_action("wpheadless/themesettings/input/end",$args);
     
     
                         }, // callback
                         $page, // page
                         $section_id, // section
-                        apply_filters("wpheadless/settings/input/atts",array(),array("field_data"=>$field_data))
+                        apply_filters("wpheadless/themesettings/input/atts",array(),array("field_data"=>$field_data))
                     );
     
                 }

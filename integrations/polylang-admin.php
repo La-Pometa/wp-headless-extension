@@ -82,7 +82,7 @@ class WPHeadlessPolylangAdmin extends Integration {
         $lang = get_array_value(get_array_value($args,"field_data",array()),"lang",false);
         $html="";
         if ( $lang ) {
-            $html ='<div class="lang-wrapper" rel="'.$lang.'">';
+            $html ='<div class="lang-input-wrapper" rel="'.$lang.'">';
         }
         echo $html;
     }
@@ -129,6 +129,7 @@ class WPHeadlessPolylangAdmin extends Integration {
         $lang = get_array_value(get_array_value($args,"field_data",array()),"lang",false);
         if ( $lang ) {
             if (!get_array_value($atts,"class","")){$atts["class"]="";}
+            $atts["class"].=(get_array_value($atts,"class","")?" ":"")."lang-wrapper";
             $atts["class"].=(get_array_value($atts,"class","")?" ":"")."lang-".$lang;
             if ( $lang != pll_default_language()) {
                $atts["class"].=(get_array_value($atts,"class","")?" ":"")."hidden";
@@ -161,7 +162,7 @@ class WPHeadlessPolylangAdmin extends Integration {
             }
     
             foreach ($list as $slug => $info) {
-                $html .= '<li class="wphls-language-pill' . ($the_lang == $slug ? ' selected' : '') . '"><a href="#' . $slug . '">' . get_array_value($info, "flag", "") . ' ' . get_array_value($info, "name", $slug) . '</a></li>';
+                $html .= '<li class="wphls-language-pill '. ($the_lang == $slug ? ' selected' : '') . '" rel="'.$slug.'"><a href="#' . $slug . '">' . get_array_value($info, "flag", "") . ' ' . get_array_value($info, "name", $slug) . '</a></li>';
             }
     
             if ($html) {
@@ -169,6 +170,43 @@ class WPHeadlessPolylangAdmin extends Integration {
             }
         }
         echo $html;
+
+        ?>
+            <style type="text/css">
+                ul.wphls-language-selector {margin: 15px 0;}
+                ul.wphls-language-selector li {display: inline-block;border: 1px solid transparent;margin-right: 15px;}
+                ul.wphls-language-selector li a:focus{box-shadow:none;}
+                ul.wphls-language-selector li a {padding: 5px;color: #aaa;text-decoration: none;display: block;outline: none;font-size: 13px;}
+                ul.wphls-language-selector li.selected,ul.wphls-language-selector li:hover {border:1px solid #ccc;}
+            </style>
+            <script type="text/javascript">
+                jQuery(document).ready(function() {
+                        WPHeadless_Integration_PolylangAdmin_ThemeSettings_LanguageSelector_Bind();
+                        WPHeadless_Integration_PolylangAdmin_ThemeSettings_LanguageSelector_FlagInputs();
+
+                });
+                function WPHeadless_Integration_PolylangAdmin_ThemeSettings_LanguageSelector_Bind() {
+                    jQuery(".wphls-language-selector li").click(function() {
+                        isSelected = jQuery(this).hasClass("selected");
+                        lang = jQuery(this).attr("rel");
+                        jQuery(".wphls-language-selector li").removeClass("selected");
+                        jQuery(this).addClass("selected");
+
+                        jQuery(".lang-wrapper").remove("hidden").css({"display":"none"})
+                        jQuery(".lang-wrapper.lang-"+lang).remove("hidden").css({"display":"block"})
+                    })
+                }
+                function WPHeadless_Integration_PolylangAdmin_ThemeSettings_LanguageSelector_FlagInputs() {
+                    jQuery(".lang-wrapper").each(function() {
+                        lang = jQuery(".lang-input-wrapper",this).attr("rel");
+                        flag = jQuery(".wphls-language-pill[rel='"+lang+"'] img").clone();
+                        jQuery(flag).prependTo(jQuery("th",this));
+                        jQuery("th img",this).css({"margin-right":"5px"})
+
+                    })
+                }
+            </script>
+        <?php
     }
     
 
