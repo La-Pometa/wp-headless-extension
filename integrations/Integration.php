@@ -46,6 +46,10 @@ abstract class Integration implements IntegrationInterface
 
     }
 
+    public function is_extension_admin_active($extension_id) {
+            return apply_filters("wpheadless/integration/admin/active",false,$extension_id);
+    }
+
 
 
     

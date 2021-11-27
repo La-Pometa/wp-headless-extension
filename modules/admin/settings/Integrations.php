@@ -61,7 +61,7 @@ class Integrations
         add_filter("wpheadless/integration/info/field/description/value",array($this,"_get_info_description"),20,2);
         add_filter("wpheadless/integration/info/field/version/value",array($this,"_get_info_version"),20,2);
         add_filter("wpheadless/integration/info/field/loaded/value",array($this,"_get_info_loaded"),20,2);
-
+        add_filter("wpheadless/integration/admin/active",array($this,"is_integration_admin_enabled"),20,2);
         $this->loaded=true;
 
     }
@@ -124,7 +124,15 @@ class Integrations
         }
         return $this->settings;
     }
+    public function is_integration_admin_enabled($enabled,$integration_id) {
+        echo "<br> IS [".$integration_id."] ENABLED?";
+        if ( $this->is_integration_enabled($integration_id)) {
+            $enabled=true;
+        }
+        echo " RESULT:".($enabled?"YES":"NO");
+        return $enabled;
 
+    }
     public function is_integration_enabled($integration_id) {
 
         //Si acabo de guardar no funciona si no ho comprovo abans

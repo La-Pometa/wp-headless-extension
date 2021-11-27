@@ -64,6 +64,12 @@ class WPHeadlessPolylangAdmin extends Integration {
         require_once ABSPATH . 'wp-admin/includes/plugin.php';
         if (!is_plugin_active('polylang/polylang.php')) {return;}
 
+
+        // Comprovar si la integració està activada
+        if ( !$this->is_extension_admin_active($this->_id)) {
+            return;
+        }
+
         // Afegir Wrapper Idioma per settings 
         add_filter("wpheadless/themesettings/input/html",array($this,"_input_wrapper"),2500,2);
         add_filter("wpheadless/themesettings/input/atts",array($this,"_input_atts_wrapper"),2500,2);
