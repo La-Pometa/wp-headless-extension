@@ -15,6 +15,7 @@ function wpheadless_adminpanel_load_module($modules)
 
 require_once "settings/General.php";
 require_once "settings/Integrations.php";
+require_once "settings/ThemeSettings.php";
 require_once "settings/ArchiveMetas.php";
 
 class WPHeadlessAdminPanel extends WPHeadlessModules
@@ -38,6 +39,7 @@ class WPHeadlessAdminPanel extends WPHeadlessModules
         $this->settings_modules["general"] = new General();
         $this->settings_modules["integrations"] = new Integrations();
         $this->settings_modules["archive-meta-cpts"] = new ArchiveMetas();
+        $this->settings_modules["themesettings"] = new ThemeSettings();
         
 
 
@@ -62,7 +64,8 @@ class WPHeadlessAdminPanel extends WPHeadlessModules
         // Pestanyes dels mòduls de AdminPanel
         $tabs["general"] = array("title" => __("General", "wpheadlessltd"), "callback" => array($this->settings_modules["general"], "render"));
         $tabs["integrations"] = array("title" => __("Integraciones", "wpheadlessltd"), "callback" => array($this->settings_modules["integrations"], "render"));
-       
+        $tabs["themesettings"] = array("title" => __("Theme Settings", "wpheadlessltd"), "callback" => array($this->settings_modules["themesettings"], "render"));
+
         if ( $this->is_integration_enabled("wphi-archivemetas")) {
             $tabs["archive-meta-cpts"] = array("title" => __("MetaSEO en páginas de archivo", "wpheadlessltd"), "callback" => array($this->settings_modules["archive-meta-cpts"], "render"));
         }
@@ -85,6 +88,7 @@ class WPHeadlessAdminPanel extends WPHeadlessModules
         $opt = "wp_headless_settings";
 
         ?>
+        <div class="wphl-settings-page">
         <h1>Headless Settings</h1>
 
         <?php do_action("wpheadless/settings/before/menu"); ?>
@@ -122,7 +126,16 @@ class WPHeadlessAdminPanel extends WPHeadlessModules
         do_action("wpheadless/settings/tab/content/after", $this);
         do_action("wpheadless/settings/css", $sub);
         do_action("wpheadless/settings/js", $sub);
-
+        ?>
+        <style type="text/css">
+           .wphl-form h2{color:#eee;font-size:120%;}
+           .wphl-settings-page h1 {font-size: 200%;color: #aaa;}
+           .wphl-settings-page h3 {font-size: 125%;color: #aaa;}
+           .wphl-settings-page h2 {font-size: 150%;color: #aaa;}
+           .wphl-settings-page hr {border-color: #666;}
+        </style>
+        </div>
+        <?php
     }
 
     function get_options()
@@ -250,7 +263,7 @@ class WPHeadlessAdminPanel extends WPHeadlessModules
         }
 
         ?>
-        <form method="post" action="options.php">
+        <form method="post" class="wphl-form" action="options.php">
             <?php
             settings_fields($this->settings_option_name);
             do_settings_sections($page);
