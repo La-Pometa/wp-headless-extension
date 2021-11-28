@@ -13,6 +13,8 @@
     Author: WPHeadless
     Text Domain: wpheadlessltd
     RequiresPHP: 7.4.2
+    Required: Yes
+    Type: Admin
 
 
 -*/
@@ -40,34 +42,73 @@ function wpheadless_rest_modules_vendor_themesettings_admin_info($modules) {
 
 
 
-
 class ThemeSettings
 {
 
-    private $settings_option_name="wpheadless_themesettings";
-    private $settings_options=false;
+    private bool $debug = true;
+    private string $section = "";
+    private array $sections = array();
+
+    function __construct() {
+        add_action("wpheadless/settings/tab/content",array($this,"render"));
+        add_filter("wpheadless/settings/sections",array($this,"get_sections"),20,2);
+        
+    }
+
+
+    function get_sections($sections, WPHeadlessAdminPanel $adminPanel) {
+        if ( $adminPanel->get_tab() != "themesettings" ) {
+            return $sections;
+        }
+
+        $sections = apply_filters("wpheadless/themesettings/tab/".$this->get_section()."/sections",$sections);
+        return $sections;
+    }
+    function get_section() {
+        if ( !$this->section) {
+            $this->section =  get_array_value($_GET, "section", array_key_first($this->getMenuSections()) );
+        }
+        return $this->section;
+    }
+
+    private function console(string $string) {
+
+            if ( $this->debug ) {
+                echo "<br> DEBUG[ThemeSettings]: ".$string;
+            }
+
+    }
 
     public function render(WPHeadlessAdminPanel $adminPanel)
     {
 
+        if ( !$adminPanel->is_tab("themesettings")) {
+            return;
+        }
 
         echo "<h1>".__("Theme Settings", "wpheadlessltd")."</h1>";
         echo "<p>".__("Personalitza les opcions del tema per a WPHeadless Settings.", "wpheadlessltd")."</p>";
-        //$adminPanel->render_sections("themesettings", self::getSections());
+
+
         $opt = "wp_headless_settings";
         $tab_id = "themesettings";
 
-        $section = get_array_value($_GET, "section", false);
+        //Filtra les seccions dins de ThemeSettings
+        $sections = self::getMenuSections();
+
+        //Secció seleccionada, o primera secció seleccionada
+        $section = get_array_value($_GET, "section", array_key_first($sections) );
 
 
+        // Carregar CSS
         self::render_page_css();
 
-
+        //Carregar Menu ThemeSettings - Sections
+        
         ?>
         <ul class="nav-section-wrapper">
         <?php
         $callback="";
-        $sections = self::getMenuSections();
         foreach($sections as $section_id => $section_data) {
 
                 $selected = "";
@@ -89,15 +130,30 @@ class ThemeSettings
         <?php do_action("wpheadless/themesettings/after/menu"); ?>
         <?php
 
+        // Carregar el contingut de la secció seleccionada
         $sections=array();
         if ($callback) {
-            $sections = call_user_func($callback);
+            if(function_exists($callback)) {
+                $sections = call_user_func($callback);
+            }
+            else {
+                echo "<br> Callback NotFound [".$callback."]";
+            }
         }
+
+        // Action abans de mostrar els inputs
         do_action("wpheadless/themesettings/tab/content/before", $section);
-        self::render_sections($section,$sections);
+
+        // Carrega els inputs de la secció seleccionada
+        $adminPanel->render_sections($section,$sections);
+
+        // Action després de mostrar els inputs
         do_action("wpheadless/themesettings/tab/content/after", $section);
+
+        // Filtrar css i javascript per a la secció seleccionada
         do_action("wpheadless/themesettings/css", $section);
         do_action("wpheadless/themesettings/js", $section);
+
         ?>
         <?php
     }
@@ -105,165 +161,25 @@ class ThemeSettings
         ?>
         <style type="text/css">
             :root{
-                --wphl-ts-section-tab-color:#cccccc;
-                --wphl-ts-section-tab-select-text-color:#eee
+                --wphl-ts-section-tab-color:#373d43;
+                --wphl-ts-section-tab-select-text-color:#373d43;
+                --wphl-ts-section-tab-select-text-active-color:#eee;
             }
-            .nav-section-wrapper{display:flex;flex-direction:row;border-bottom:1px solid var(--wphl-ts-section-tab-color)}
+            .nav-section-wrapper{display:flex;flex-direction:row;border-bottom:1px solid var(--wphl-ts-section-tab-select-text-color);margin:35px 0 25px 0}
             .nav-section-wrapper .nav-section {margin: 0px 5px;text-decoration: none;color:#bbb;border:1px solid transparent;outline:none;border-radius:4px 4px 0px 0px;position:relative;}
             .nav-section-wrapper .nav-section a{padding:10px 15px;color:var(--wphl-ts-section-tab-select-text-color);display:block;outline:none;text-decoration:none;box-shadow:none}
             .nav-section-wrapper .nav-section:focus{outline:none}
             .nav-section-wrapper .nav-section:hover, .nav-section-wrapper .nav-section.nav-section-active {border-color:var(--wphl-ts-section-tab-color) var(--wphl-ts-section-tab-color) transparent var(--wphl-ts-section-tab-color);color: var(--wphl-ts-section-tab-color);}
+            .nav-section-wrapper .nav-section:hover a, .nav-section-wrapper .nav-section.nav-section-active a{color:var(--wphl-ts-section-tab-select-text-active-color);}
             .nav-section-wrapper .nav-section:after{content:"";position:absolute;left:0;right:0px;height:2px;background:transparent;}
             .nav-section-wrapper .nav-section:hover:after,.nav-section-wrapper .nav-section.nav-section-active:after{background-color:#1a1a1a}
+            .wphl-settings-page hr{border-color:var(--wphl-ts-section-tab-color)}
+            .wphl-form h2 hr{border-color:var(--wphl-ts-section-tab-color)}
         </style>
         <?php
     }
     public function getMenuSections() : array {
-        $tabs = apply_filters("wpheadless/themesettings/tabs",array());
-        return $tabs;
-    }
-    public function getSections(): array
-    {
-        $sections = array();
-        return $sections;
-    }
-    function get_options()
-    {
-        if (!$this->settings_options) {
-            $this->settings_options = get_option($this->settings_option_name);
-        }
-        return $this->settings_options;
-    }
-
-    function get_option($var_name = "", $default = false)
-    {
-        $options = $this->get_options();
-        if ($var_name) {
-            return get_array_value($options, $var_name, $default);
-        }
-    }
-    function input_sanitize($input)
-    {
-        return $input;
-    }
-    function input($args = array())
-    {
-        $input_id = get_array_value($args, "id", false);
-        $input_class = get_array_value($args, "class", false);
-        if (!$input_id) {
-            return "";
-        }
-
-        if (is_array($input_class)) {
-            $input_class = implode(" ", $input_class);
-        }
-
-        $class_attr = "";
-        if ($input_class) {
-            $class_attr = ' class="' . $input_class . '"';
-        }
-
-        $args["value"] = $this->get_option($input_id, "");
-
-        $html = '<input type="text" value="" ' . $class_attr . '>';
-
-        $html = apply_filters("wpheadless/themesettings/input/html", $html, $args);
-
-
-        return $html;
-    }
-
-    public function render_sections($page,$sections) {
-
-
-            $option_name = $this->settings_option_name;
-            $page= "whpeadless-themesettings-section-".$page;
-    
-            register_setting(
-                $option_name, // option_group
-                $option_name, // option_name
-                function($input) {
-                    return $input;
-                } // sanitize_callback
-            );
-    
-    
-            /*- Habilitar Multidioma : Polylang (TODO: WPML) -*/
-            $sections = apply_filters("wpheadless/themesettings/tab/sections",$sections);
-    
-            
-            foreach ($sections as $section_id => $section_data) {
-    
-                $section_title = get_array_value($section_data, "title", "NoTitle[" . $section_id . "]");
-    
-                add_settings_section(
-                    $section_id, // id
-                    '<hr><br>' . $section_title, // title
-                    function () use ($section_id, $section_data) {
-                        $section_description = get_array_value($section_data, "description", "");
-                        if ($section_description) {
-                            echo "<p>" . $section_description . "</p>";
-                        }
-                        $section_html = get_array_value($section_data, "html", "");
-                        if ($section_html) {
-                            echo $section_html;
-                        }
-                    }, // callback
-                    $page // page
-                );
-    
-                $fields = get_array_value($section_data, "fields", array());
-                foreach ($fields as $field_id => $field_data) {
-                    $field_title = get_array_value($field_data, "title", "NoTitle[" . $field_id . "]");
-                    $field_description = get_array_value($field_data, "title", "NoTitle[" . $field_id . "]");
-    
-                    add_settings_field(
-                        $field_id, // id
-                        $field_title, // title
-                        function () use ($field_id, $field_data) {
-                            $field_description = get_array_value($field_data, "description", "");
-                            $args = array(
-                                "id" => $field_id,
-                                "field_data"=>$field_data,
-                                "type" => get_array_value($field_data, "type", "text"),
-                                "class" => get_array_value($field_data, "class", ""),
-                            );
-    
-                            do_action("wpheadless/themesettings/input/start",$args);
-    
-                            echo self::input($args);
-    
-                            if ($field_description) {
-                                echo "<p>" . $field_description . "</p>";
-                            }
-                            $field_html = get_array_value($field_data, "html", "");
-                            if ($field_html) {
-                                echo "<p>" . $field_html . "</p>";
-                            }
-                            do_action("wpheadless/themesettings/input/end",$args);
-    
-    
-                        }, // callback
-                        $page, // page
-                        $section_id, // section
-                        apply_filters("wpheadless/themesettings/input/atts",array(),array("field_data"=>$field_data))
-                    );
-    
-                }
-            }
-    
-            ?>
-            <form method="post"  class="wphl-form" action="options.php">
-                <?php
-                settings_fields($option_name);
-                do_settings_sections($page);
-                submit_button();
-                ?>
-            </form>
-
-            <?php
-    
-
+        return apply_filters("wpheadless/themesettings/tabs",array());
     }
 
 }

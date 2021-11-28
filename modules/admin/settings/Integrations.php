@@ -62,6 +62,8 @@ class Integrations
         add_filter("wpheadless/integration/info/field/version/value",array($this,"_get_info_version"),20,2);
         add_filter("wpheadless/integration/info/field/loaded/value",array($this,"_get_info_loaded"),20,2);
         add_filter("wpheadless/integration/admin/active",array($this,"is_integration_admin_enabled"),20,2);
+        add_action("wpheadless/settings/tab/content",array($this,"render"));
+
         $this->loaded=true;
 
     }
@@ -125,11 +127,9 @@ class Integrations
         return $this->settings;
     }
     public function is_integration_admin_enabled($enabled,$integration_id) {
-        echo "<br> IS [".$integration_id."] ENABLED?";
         if ( $this->is_integration_enabled($integration_id)) {
             $enabled=true;
         }
-        echo " RESULT:".($enabled?"YES":"NO");
         return $enabled;
 
     }
@@ -147,6 +147,10 @@ class Integrations
 
     public function render(WPHeadlessAdminPanel $adminPanel)
     {
+
+            if ( !$adminPanel->is_tab("integrations")) {
+                return;
+            }
 
         echo "<h1>".__("Integraciones", "wpheadlessltd")."</h1>";
         echo "<p>".__("WPH se integra con estos plugins.", "wpheadlessltd")."</p>";

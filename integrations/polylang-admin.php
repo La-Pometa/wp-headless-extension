@@ -71,17 +71,17 @@ class WPHeadlessPolylangAdmin extends Integration {
         }
 
         // Afegir Wrapper Idioma per settings 
-        add_filter("wpheadless/themesettings/input/html",array($this,"_input_wrapper"),2500,2);
-        add_filter("wpheadless/themesettings/input/atts",array($this,"_input_atts_wrapper"),2500,2);
-        add_action("wpheadless/themesettings/input/start",array($this,"_input_start_wrapper"),0);
-        add_action("wpheadless/themesettings/input/end",array($this,"_input_end_wrapper"),2500);
+        add_filter("wpheadless/settings/input/html",array($this,"_input_wrapper"),2500,2);
+        add_filter("wpheadless/settings/input/atts",array($this,"_input_atts_wrapper"),2500,2);
+        add_action("wpheadless/settings/input/start",array($this,"_input_start_wrapper"),0);
+        add_action("wpheadless/settings/input/end",array($this,"_input_end_wrapper"),2500);
 
         // Afegir Selector d'idioma dins de Settings
 
         add_action("wpheadless/themesettings/tab/content/before",array($this,"_settings_before_polylang_selector"));
 
         // Modificar sections per a multiidioma 
-        add_filter("wpheadless/themesettings/tab/sections",array($this,"_settings_section"),2500);
+        add_filter("wpheadless/settings/tab/sections",array($this,"_settings_section"),2500);
 
     }
     function _input_start_wrapper($args=array()) {
@@ -118,7 +118,7 @@ class WPHeadlessPolylangAdmin extends Integration {
                 
 
                 foreach($fields as $field_id => $field_data) {
-                    $field_lang = $field_id.":".$lang_id;
+                    $field_lang = $field_id."|".$lang_id;
                     $field_data["lang"]=$lang_id;
                     if (!isset($sec[$section_id]["fields"][$field_lang])){$sec[$section_id]["fields"][$field_lang]=array();}
                     $sec[$section_id]["fields"][$field_lang]=$field_data;
