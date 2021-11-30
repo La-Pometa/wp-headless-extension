@@ -52,6 +52,10 @@ class ThemeSettings
     function __construct() {
         add_action("wpheadless/settings/tab/content",array($this,"render"));
         add_filter("wpheadless/settings/sections",array($this,"get_sections"),20,2);
+        add_action("wpheadless/settings/do_settings_sections",array($this,"do_settings_sections"));
+        add_action("wpheadless/settings/do_settings_sections/before", array($this,"settings_section_start"));
+        add_action("wpheadless/settings/do_settings_sections/after", array($this,"settings_section_end"));
+
         
     }
 
@@ -79,6 +83,61 @@ class ThemeSettings
 
     }
 
+    public function do_settings_sections(WPHeadlessAdminPanel $adminPanel) {
+
+
+
+        $sections = self::getMenuSections();
+        $section = get_array_value($_GET, "section", array_key_first($sections) );
+
+
+        // Action abans de mostrar els inputs
+        do_action("wpheadless/themesettings/tab/content/before", $adminPanel);
+
+
+        foreach($sections as $section_id => $section_data) {
+            $active = "";
+            if ($section_id == $section) { 
+                $active="nav-section-active";
+            }
+            ?>
+            <div class="nav-section-panel nav-section-<?php echo $section_id; ?> <?php echo $active; ?>">
+            <?php
+
+                do_action("wpheadless/themesettings/tab/content/before/section", $section_id);
+
+                // Carrega els inputs de la secció seleccionada
+                $this_sections = apply_filters("wpheadless/themesettings/tab/".$section_id."/sections",array(),$adminPanel);
+                $adminPanel->render_sections($section_id,$this_sections);
+                do_settings_sections($section_id);
+                // Filtrar css i javascript per a la secció seleccionada
+                do_action("wpheadless/themesettings/css", $section_id);
+                do_action("wpheadless/themesettings/js", $section_id);
+
+                do_action("wpheadless/themesettings/tab/content/after/section", $section_id);
+
+
+
+            ?>
+
+            </div>
+            <?php
+        }
+
+
+            // Action després de mostrar els inputs
+            do_action("wpheadless/themesettings/tab/content/after", $adminPanel);
+
+
+            ?>
+         </div>
+        <?php
+
+
+    }
+
+    function settings_section_start() {  ?><div class="nav-sections-wrapper"><?php }
+    function settings_section_end() {  ?></div><?php }
     public function render(WPHeadlessAdminPanel $adminPanel)
     {
 
@@ -103,6 +162,10 @@ class ThemeSettings
         // Carregar CSS
         self::render_page_css();
 
+
+        // Carregar JS
+        self::render_page_js();
+
         //Carregar Menu ThemeSettings - Sections
         
         ?>
@@ -112,49 +175,45 @@ class ThemeSettings
         foreach($sections as $section_id => $section_data) {
 
                 $selected = "";
-                $link = esc_attr(admin_url('options-general.php?page=' . $opt . '&sub=' . $tab_id . '&section='.$section_id));
+               // $link = esc_attr(admin_url('options-general.php?page=' . $opt . '&sub=' . $tab_id . '&section='.$section_id));
+                $link = '#panel-'.$section_id;
                 $title = get_array_value($section_data, "title", "NoTitle:" . $section_id);
                 if ($section_id == $section) {
                     $selected = "nav-section-active";
                     $callback = get_array_value($section_data, "callback", false);
                 }
                 ?>
-                <li class="nav-section <?php echo $selected; ?>">
+                <li class="nav-section nav-section-<?php echo $section_id; ?> <?php echo $selected; ?>">
                     <a href="<?php echo $link; ?>" id="<?php echo $section_id; ?>"><?php echo $title; ?></a>
                 </li>
                 <?php
         }
         ?>
         </ul>
-
         <?php do_action("wpheadless/themesettings/after/menu"); ?>
         <?php
 
-        // Carregar el contingut de la secció seleccionada
-        $sections=array();
-        if ($callback) {
-            if(function_exists($callback)) {
-                $sections = call_user_func($callback);
-            }
-            else {
-                echo "<br> Callback NotFound [".$callback."]";
-            }
-        }
+    }
 
-        // Action abans de mostrar els inputs
-        do_action("wpheadless/themesettings/tab/content/before", $section);
-
-        // Carrega els inputs de la secció seleccionada
-        $adminPanel->render_sections($section,$sections);
-
-        // Action després de mostrar els inputs
-        do_action("wpheadless/themesettings/tab/content/after", $section);
-
-        // Filtrar css i javascript per a la secció seleccionada
-        do_action("wpheadless/themesettings/css", $section);
-        do_action("wpheadless/themesettings/js", $section);
-
+    public function render_page_js() {
         ?>
+            <script type="text/javascript">
+                function WPHeadlessThemeSettingsBindSections() {
+                    jQuery("a[href^='#panel-']").click(function(e) {
+                        panel = jQuery(this).attr("href").replace("#panel-","");
+                        console.log("Click Panel:"+panel);
+                        jQuery(".nav-section-panel").removeClass("nav-section-active");
+                        jQuery(".nav-section-panel.nav-section-"+panel).addClass("nav-section-active");
+                        jQuery(".nav-section").removeClass("nav-section-active");
+                        jQuery(".nav-section.nav-section-"+panel).addClass("nav-section-active");
+
+                        e.preventDefault();
+                    });
+                }
+                jQuery(document).ready(function() {
+                    WPHeadlessThemeSettingsBindSections();
+                });
+            </script>
         <?php
     }
     public function render_page_css() {
@@ -173,6 +232,9 @@ class ThemeSettings
             .nav-section-wrapper .nav-section:hover a, .nav-section-wrapper .nav-section.nav-section-active a{color:var(--wphl-ts-section-tab-select-text-active-color);}
             .nav-section-wrapper .nav-section:after{content:"";position:absolute;left:0;right:0px;height:2px;background:transparent;}
             .nav-section-wrapper .nav-section:hover:after,.nav-section-wrapper .nav-section.nav-section-active:after{background-color:#1a1a1a}
+            .nav-sections-wrapper .nav-section-panel{display:none;}
+            .nav-sections-wrapper .nav-section-panel.nav-section-active{display:block;}
+            .nav-sections-wrapper .nav-section-panel hr:first-child {display: none;}
             .wphl-settings-page hr{border-color:var(--wphl-ts-section-tab-color)}
             .wphl-form h2 hr{border-color:var(--wphl-ts-section-tab-color)}
         </style>

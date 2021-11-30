@@ -153,15 +153,17 @@ class WPHeadlessAdminPanel extends WPHeadlessModules
         <style type="text/css">
            .wphl-form h2{color:#eee;font-size:120%;}
            .wphl-settings-page h1 {font-size: 200%;color: #aaa;}
-           .wphl-settings-page h3 {font-size: 125%;color: #aaa;}
            .wphl-settings-page h2 {font-size: 150%;color: #aaa;}
+           .wphl-settings-page h3 {font-size: 125%;color: #aaa;}
            .wphl-settings-page hr {border-color: #666;}
         </style>
         </div>
         <form method="post" class="wphl-form" action="options.php">
             <?php
             settings_fields($this->settings_option_group);
-            do_settings_sections($this->get_tab());
+            do_action("wpheadless/settings/do_settings_sections/before",$this);
+            do_action("wpheadless/settings/do_settings_sections",$this);
+            do_action("wpheadless/settings/do_settings_sections/after",$this);
             submit_button();
             ?>
         </form>
@@ -220,11 +222,12 @@ class WPHeadlessAdminPanel extends WPHeadlessModules
         return $html;
     }
 
-    function render_sections($page, $sections = array())
+    function render_sections($page = false, $sections = array())
     {
 
-        $page = $this->get_tab();
-
+        if ( !$page ) {
+            $page = $this->get_tab();
+        }
 
         /*- Habilitar Multidioma : Polylang (TODO: WPML) -*/
         $sections = apply_filters("wpheadless/settings/tab/sections",$sections);
