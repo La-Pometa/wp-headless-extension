@@ -56,11 +56,13 @@ class ThemeSettings
         add_action("wpheadless/settings/do_settings_sections/before", array($this,"settings_section_start"));
         add_action("wpheadless/settings/do_settings_sections/after", array($this,"settings_section_end"));
 
+        add_filter("wpheadless/settings/input/html",array($this,"settings_section_input"),20,2);
         
     }
 
 
     function get_sections($sections, WPHeadlessAdminPanel $adminPanel) {
+
         if ( $adminPanel->get_tab() != "themesettings" ) {
             return $sections;
         }
@@ -70,11 +72,19 @@ class ThemeSettings
     }
     function get_section() {
         if ( !$this->section) {
-            $this->section =  get_array_value($_GET, "section", array_key_first($this->getMenuSections()) );
+            $default = array_key_first($this->getMenuSections());
+
+            if ( !$default) {
+                $default="";
+            }
+
+            $this->section =  get_array_value($_GET, "section", $default );
         }
         return $this->section;
     }
-
+    public function getMenuSections() : array {
+        return apply_filters("wpheadless/themesettings/tabs",array());
+    }
     private function console(string $string) {
 
             if ( $this->debug ) {
@@ -86,6 +96,9 @@ class ThemeSettings
     public function do_settings_sections(WPHeadlessAdminPanel $adminPanel) {
 
 
+        if ( $adminPanel->get_tab() != "themesettings" ) {
+            return;
+        }
 
         $sections = self::getMenuSections();
         $section = get_array_value($_GET, "section", array_key_first($sections) );
@@ -155,8 +168,16 @@ class ThemeSettings
         //Filtra les seccions dins de ThemeSettings
         $sections = self::getMenuSections();
 
-        //Secció seleccionada, o primera secció seleccionada
-        $section = get_array_value($_GET, "section", array_key_first($sections) );
+        //Secció Actual
+        $section = $this->get_section();
+
+
+        if ( !$section ) {
+            // No hi ha cap secció definida+
+           echo "<p><strong>".__("No hi ha configuració del tema definida. Crear el archivo settings.php al teu tema","wpheadlessltd").'</strong></p>';
+           return ;
+        }
+
 
 
         // Carregar CSS
@@ -240,8 +261,42 @@ class ThemeSettings
         </style>
         <?php
     }
-    public function getMenuSections() : array {
-        return apply_filters("wpheadless/themesettings/tabs",array());
+
+
+    function settings_section_input($html,$args) {
+
+        $type = get_array_value($args,"type","text");
+        $id = get_array_value($args,"id",false);
+
+        if ( !$type ) {
+            return $html;
+        }
+
+        if ( !$id ) {
+            return $html;
+        }
+
+        $value = get_array_value($args,"value","");
+        $class = get_array_value($args,"class","");
+
+
+        //echo "<br> TYPE[".$type."] <br> <pre>".print_r($args,true)."</pre>";
+
+        switch($type) {
+            case "text":
+            case "hidden":
+            case "number":
+            case "date":
+
+
+                $html = '<input type="'.$type.'" name="'.$id.'" class="'.$class.'" value="'.$value.'">';
+
+            default:
+        }
+
+        return $html;
+
     }
+
 
 }

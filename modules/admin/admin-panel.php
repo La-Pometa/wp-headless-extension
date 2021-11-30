@@ -201,22 +201,22 @@ class WPHeadlessAdminPanel extends WPHeadlessModules
             return "";
         }
 
+        $class_attr = "";
+
         if (is_array($input_class)) {
             $input_class = implode(" ", $input_class);
         }
-
-        $class_attr = "";
         if ($input_class) {
             $class_attr = ' class="' . $input_class . '"';
         }
 
-
+        //Valor del input
         $option_value = get_array_value($this->get_option($this->get_tab()),get_array_value($args,"rid",false),false);
         $args["value"] = apply_filters("wpheadless/settings/input/value",$option_value,$args);
 
-        $html = '<input type="text" value="" ' . $class_attr . '>';
 
-        $html = apply_filters("wpheadless/settings/input/html", $html, $args);
+        //Render el input
+        $html = apply_filters("wpheadless/settings/input/html","", $args);
 
 
         return $html;

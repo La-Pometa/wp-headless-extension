@@ -83,6 +83,20 @@ class WPHeadlessPolylangAdmin extends Integration {
         // Modificar sections per a multiidioma 
         add_filter("wpheadless/settings/tab/sections",array($this,"_settings_section"),2500);
 
+
+        //Afegir [IDIOMA] abans del text
+        add_filter("wpheadless/whpi-polylang-admin/language/string",array($this,"_post_language_string"),20,2);
+
+    }
+    function _post_language_string($text,$post_id) {
+            $html=$text;
+            $lang = pll_get_post_language($post_id,"slug");
+            if ( $lang ) {
+                $lang = "[".strtoupper($lang)."]";
+                $html = $lang." ".$text;
+            }
+            return $html;
+
     }
     function _input_start_wrapper($args=array()) {
         $lang = get_array_value(get_array_value($args,"field_data",array()),"lang",false);
@@ -206,7 +220,7 @@ class WPHeadlessPolylangAdmin extends Integration {
                     jQuery(".lang-wrapper").each(function() {
                         lang = jQuery(".lang-input-wrapper",this).attr("rel");
                         flag = jQuery(".wphls-language-pill[rel='"+lang+"'] img").clone();
-                        jQuery(flag).prependTo(jQuery("th",this));
+                        jQuery(flag).prependTo(jQuery("> th",this));
                         jQuery("th img",this).css({"margin-right":"5px"})
 
                     })
