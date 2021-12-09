@@ -53,6 +53,7 @@ class WPHeadlessModules
             } else {
                 $this->console("REGISTER MODULE[" . $module . "] {" . $module_class . "}", $this->debug);
                 $this->modules[$module] = new $module_class();
+                $this->modules[$module]->integration_id = $module;
                 $this->modules[$module]->start($module, $module_class);
                 $this->modules[$module]->debug = $this->debug;
             }

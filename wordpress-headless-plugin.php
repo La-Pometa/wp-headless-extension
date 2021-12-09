@@ -27,7 +27,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 5152 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-
 require_once("includes/common.php");
 
 if (!class_exists('WP_Headless')) {
@@ -100,7 +99,7 @@ if (!class_exists('WP_Headless')) {
         // Add the settings link to the plugins page
         function plugin_settings_link($links)
         {
-            $settings_link = '<a href="options-general.php?page=wp_headless">Settings</a>';
+            $settings_link = '<a href="options-general.php?page=wp_headless_settings">Settings</a>';
             array_unshift($links, $settings_link);
             return $links;
         }

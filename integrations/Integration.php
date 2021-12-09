@@ -3,7 +3,7 @@ require_once "IntegrationInterface.php";
 
 abstract class Integration implements IntegrationInterface
 {
-    public bool $debug = false;
+    public bool $debug = true;
 
     private string $_id;
     public $_version = "0.0.0";

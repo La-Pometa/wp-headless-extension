@@ -5,7 +5,7 @@
 
     Plugin ID: whpi-polylang
     Plugin Name: WPHeadless-Integration Polylang
-    Plugin URI: https://www.lapometa.com/headless
+    Plugin URI: https://www.lapometa.com/pometa-headless
     Description: Integració Polylang amb API REST per a Multiidioma
     Version: 0.0.1
     Author: WPHeadless
@@ -36,21 +36,28 @@ function wpheadless_rest_modules_vendor_polylang_admin_info($modules) {
 }
 
 
+add_filter("wpheadless/modules/load", "wpheadless_polylang_load_module");
+function wpheadless_polylang_load_module($modules)
+{
+    $modules["polylang"] = "WPHeadlessPolyLang";
+    return $modules;
+}
 
 
 
 
-require_once "Integration.php";
-
-class WPHeadlessPolyLang extends Integration
+class WPHeadlessPolyLang extends WPHeadlessModules
 {
 
     static bool $instance = false;
 
     public function init()
     {
+
         // Check if polylang is installed
         require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+        
         if (!is_plugin_active('polylang/polylang.php')) {
             return;
         }
