@@ -47,6 +47,25 @@ function wpheadless_themesettings_modules_vendor_polylang_admin_info($modules) {
 }
 
 
+
+add_action("wpheadless/settings/input/id","_polylang_admin_input_id",2500);
+
+function _polylang_admin_input_id($id) {
+    if (!function_exists("pll_current_language"))  return $id; 
+
+    $lang = pll_current_language();
+    if ( !$lang ) {
+        $lang = pll_default_language();
+    }
+    if ( $lang ) {
+        $id.="|".$lang;
+    }
+    return $id;
+
+
+}
+
+
 class WPHeadlessPolylangAdmin extends Integration {
 
     function __construct() {
@@ -88,6 +107,9 @@ class WPHeadlessPolylangAdmin extends Integration {
         add_filter("wpheadless/whpi-polylang-admin/language/string",array($this,"_post_language_string"),20,2);
 
     }
+
+
+    
     function _post_language_string($text,$post_id) {
             $html=$text;
             $lang = pll_get_post_language($post_id,"slug");

@@ -12,6 +12,7 @@ class WPHeadlessContent extends WPHeadlessModules
 
 		add_action("init", array($this, "init"));
 		add_filter("the_content", array($this, "_filter_content"));
+		add_filter("wpheadless/archive",array($this,"_headless_archive"),20,3);
 	}
 
 
@@ -118,6 +119,13 @@ class WPHeadlessContent extends WPHeadlessModules
 		return $output;
 	}
 
+	function _headless_archive($response , $object, $request) {
+
+		$newResponse = $response;
+		return $newResponse;
+
+
+	}
 
 	function init()
 	{
@@ -126,16 +134,7 @@ class WPHeadlessContent extends WPHeadlessModules
 			if (!get_array_value($request->get_params(), "per_page", false)) return $object;
 
 			$responseData = $object->get_data();
-			$newResponse = array();
-			$newResponse['data'] = $responseData;
-			$newResponse['page_meta'] = rest_do_request(new WP_REST_Request(
-				'GET',
-				'/wp/v2/types/' . $responseData[0]['type'],
-				array(
-					'lang' => get_array_value($request->get_params(), "lang", false),
-				)
-			))->get_data();
-
+			$newResponse = apply_filters("wpheadless/archive",$responseData,$object,$request);
 			$object->set_data($newResponse);
 			return $object;
 		}, 200, 3);
