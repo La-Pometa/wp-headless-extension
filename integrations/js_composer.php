@@ -109,7 +109,14 @@ class WPHeadlessJSComposer extends WPHeadlessModules
         if (is_plugin_active('js_composer/js_composer.php') && preg_match('/vc_row/', $post->post_content)) {
             WPBMap::addAllMappedShortcodes();
         }
-        $output["rendered"] = strip_tags(do_shortcode($post->post_content));
+
+
+        $content =  do_shortcode($post->post_content);
+        $content_st = strip_tags($content);
+        $content = wp_trim_words($content_st,25);
+        $content = str_replace(array("\n","\t"),array("",""),$content);
+        
+        $output["rendered"] = $content;
 
         return $output;
     }
@@ -135,19 +142,3 @@ class WPHeadlessJSComposer extends WPHeadlessModules
 
 
 
-add_filter("get_the_excerpt", "wpheadless_vendor_js_composer_filter_get_the_excerpt", 50, 2);
-
-function wpheadless_vendor_js_composer_filter_get_the_excerpt($content, $post)
-{
-
-
-    if (!is_plugin_active('js_composer/js_composer.php')) {
-        return;
-    }
-
-    WPBMap::addAllMappedShortcodes();
-
-    $content =  do_shortcode($post->post_content);;
-
-    return $content;
-}
