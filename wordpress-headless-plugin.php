@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Wordpress Headless Plugin
+Plugin Name: Pometa Wordpress Headless API Extensions
 Plugin URI: https://lapometa.com
 Description: A simple wordpress headless plugin to make your wordpress headless capable
 Version: 0.0.2
