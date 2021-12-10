@@ -3,7 +3,7 @@
 Plugin Name: Wordpress Headless Plugin
 Plugin URI: https://lapometa.com
 Description: A simple wordpress headless plugin to make your wordpress headless capable
-Version: 0.0.2
+Version: 0.0.3
 Author: La Pometa
 Author URI: https://github.com/La-Pometa
 GitHub Plugin URI: La-Pometa/wp-headless-plugin
