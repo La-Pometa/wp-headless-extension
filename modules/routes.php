@@ -1,7 +1,7 @@
 <?php
 
 
-class WPHeadlessRoutes extends WPHeadlessModules {
+class WPHeadlessRoutes extends WPHeadlessModule {
 
     var $debug=false;
 

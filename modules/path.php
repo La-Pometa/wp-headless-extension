@@ -8,7 +8,7 @@ function wpheadless_path_load_module($modules) {
 }
 
 
-class WPHeadlessPath extends WPHeadlessModules {
+class WPHeadlessPath extends WPHeadlessModule {
 
 
         function __construct() {

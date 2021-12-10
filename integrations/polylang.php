@@ -46,7 +46,7 @@ function wpheadless_polylang_load_module($modules)
 
 
 
-class WPHeadlessPolyLang extends WPHeadlessModules
+class WPHeadlessPolyLang extends WPHeadlessModule
 {
 
     static bool $instance = false;

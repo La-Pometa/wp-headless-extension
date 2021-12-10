@@ -1,24 +1,23 @@
 <?php
 
 
-class WPHeadlessContent extends WPHeadlessModules
+class WPHeadlessContent extends WPHeadlessModule
 {
 
 
 	static $instance = false;
+	var $excerpt = "";
 
 	public function __construct()
 	{
 
 		add_action("init", array($this, "init"));
-		add_filter("the_content", array($this, "_filter_content"));
+		add_filter("the_content", array($this, "_filter_content"),20);
 		add_filter("wpheadless/archive",array($this,"_headless_archive"),20,3);
 	}
 
-
 	function _filter_content($content)
-	{
-
+	{	
 		$content = do_shortcode($content);
 		return $content;
 	}
@@ -26,20 +25,13 @@ class WPHeadlessContent extends WPHeadlessModules
 	function content_render_post_meta($object, $field_name, WP_REST_Request $request)
 	{
 
-		$post_type = get_post_type($object["id"]);
-		$is_archive = false;
-
-
-		if (get_array_value($request->get_params(), "id", false) == false) {
-
-			/*- Estic en un llistat de post_type -*/
-			$is_archive = true;
-
+		if ( $this->is_post_archive()) {
 			if (!apply_filters("wpheadless/rest/content/list/post_meta/include", false, array("object" => $object, "request" => $request))) {
 				return false;
 			}
 		}
-
+		
+		$post_type = get_array_value($object["type"]);
 
 		/*- Passar les variables de postmeta arreglades -*/
 
@@ -160,6 +152,28 @@ class WPHeadlessContent extends WPHeadlessModules
 					continue;
 				}
 
+				register_rest_field(
+					$cpt,
+					'content',
+					array(
+						'get_callback'    => array($this, "content_render"),
+						'update_callback' => null,
+						'schema'          => null,
+					)
+				);
+		
+				$this->console("Loading CPT [" . $cpt . "][content_render_excerpt]");
+		
+				register_rest_field(
+					$cpt,
+					'excerpt',
+					array(
+						'get_callback'    => array($this, "content_render_excerpt"),
+						'update_callback' => null,
+						'schema'          => null,
+					)
+				);
+
 				$this->console("Loading CPT [" . $cpt . "][autor_info]");
 				register_rest_field(
 					$cpt,
@@ -202,6 +216,40 @@ class WPHeadlessContent extends WPHeadlessModules
 		add_filter("wpheadless/rest/content/taxonomy/hide", array($this, "_prevent_terms"));
 	}
 
+    function content_render_excerpt($object, $field_name, $request)
+    {
+		$post_content = get_array_value(get_array_value($object,"content",array()),"raw","");
+
+		if ( !$post_content ) {
+				$post_content = $this->excerpt;
+		}
+
+	//	$post_content = apply_filters("wpheadless/content/excerpt",$post_content,$object);
+
+		$content = preg_replace("~(?:\[/?)[^/\]]+/?\]~s", '', $post_content);
+
+        $content = strip_tags($content);
+      	$content = wp_trim_words($content,25);
+       	$content = str_replace(array("\n","\t"),array("",""),$content);
+
+
+		
+		return array("rendered"=>$content);
+	}
+
+    function content_render($object, $field_name, $request)
+    {
+        $post_content = get_array_value(get_array_value($object,"content",array()),"raw","");
+
+		$this->excerpt = $post_content;
+        if ( $this->is_post_archive()) {
+			//$post_content = "";
+        }
+		$post_content = apply_filters("wpheadless/content",$post_content,$object);
+		$post_content = do_shortcode($post_content);
+		return array("rendered"=>$post_content);
+    }
+
 	function _prevent_terms($terms)
 	{
 		$terms[] = "post_translations";
@@ -209,3 +257,23 @@ class WPHeadlessContent extends WPHeadlessModules
 		return $terms;
 	}
 }
+
+
+
+
+
+
+
+
+function so_45027789_rest_prepare_post($data, $post, $request)
+{
+    $params = $request->get_params();
+    if(isset($params['_minimal'])) {
+        foreach($data->get_links() as $_linkKey => $_linkVal) {
+            $data->remove_link($_linkKey);
+        }
+    }
+    return $data;
+}
+
+add_filter('rest_prepare_post', 'so_45027789_rest_prepare_post', 1, 3);

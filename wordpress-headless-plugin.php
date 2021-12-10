@@ -42,18 +42,27 @@ if (!class_exists('WP_Headless')) {
          */
         private WPHeadlessModules $Modules;
 
+
+        private bool $debug = false;
+
         /**
          * Construct the plugin object
          */
         public function __construct()
         {
 
+
+            // Filter Request 
+            $this->_filter_request();
+
+
             // Initialize Settings
             require_once(sprintf("%s/modules/module.php", dirname(__FILE__)));
             $this->Modules = new WPHeadlessModules();
 
             if (get_array_value($_GET, "debug", false) !== false) {
-                $this->Modules->debug = true;
+                $this->debug=true;
+                $this->Modules->setDebug(true);
             }
 
             require_once(sprintf("%s/modules/IntegrationsLoader.php", dirname(__FILE__)));
@@ -64,7 +73,7 @@ if (!class_exists('WP_Headless')) {
 
 
             //Carrega Mòduls + Vendor Mòduls
-            $this->Modules->load();
+            $this->Modules->load($this);
 
             $plugin = plugin_basename(__FILE__);
             add_filter("plugin_action_links_$plugin", array($this, 'plugin_settings_link'));
@@ -102,6 +111,29 @@ if (!class_exists('WP_Headless')) {
             $settings_link = '<a href="options-general.php?page=wp_headless_settings">Settings</a>';
             array_unshift($links, $settings_link);
             return $links;
+        }
+
+        function _filter_request() {
+            $path= get_array_value($_SERVER,"PATH_INFO","/");
+            $request = new WP_REST_Request( $_SERVER['REQUEST_METHOD'], $path );
+            $request->set_query_params( wp_unslash( $_GET ) );
+            $request->set_body_params( wp_unslash( $_POST ) );
+            $request->set_file_params( $_FILES );
+
+
+            if (get_array_value($request->get_params(), "id", false) == false) {
+
+                    $this->request_type="archive";
+            }
+        }
+        function set_request_type($type) : void {
+            $this->request_type=$type;
+        }
+        function get_request_type() : string {
+            return $this->request_type;
+        }
+        function getDebug() {
+            return $this->debug;
         }
     } // END class WP_Plugin_Template
 } // END if(!class_exists('WP_Plugin_Template'))

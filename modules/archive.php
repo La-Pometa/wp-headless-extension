@@ -10,7 +10,7 @@ function wpheadless_archive_load_module($modules)
 
 
 
-final class WPHeadlessArchive extends WPHeadlessModules
+final class WPHeadlessArchive extends WPHeadlessModule
 {
 
     public function __construct()

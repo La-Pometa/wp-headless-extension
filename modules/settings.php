@@ -9,7 +9,7 @@ function wpheadless_settings_load_module($modules)
 }
 
 
-class WPHeadlessSettings extends WPHeadlessModules
+class WPHeadlessSettings extends WPHeadlessModule
 {
 
 

@@ -9,7 +9,7 @@ function wpheadless_intuitivecpo_load_module($modules) {
 
 
 
-class WPHeadlessIntuitiveCPO extends WPHeadlessModules {
+class WPHeadlessIntuitiveCPO extends WPHeadlessModule {
 
 
     function _construct() {

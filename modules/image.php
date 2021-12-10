@@ -1,7 +1,7 @@
 <?php
 
 
-class WPHeadlessImage extends WPHeadlessModules {
+class WPHeadlessImage extends WPHeadlessModule {
 
 		public function __construct()
 		{

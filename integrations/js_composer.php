@@ -44,98 +44,57 @@ function wpheadless_jscomposer_load_module($modules)
 }
 
 
-class WPHeadlessJSComposer extends WPHeadlessModules
+class WPHeadlessJSComposer extends WPHeadlessModule
 {
 
-
-    function _construct()
-    {
-
-        add_action("init", array($this, "init"));
-
-        add_action("wpheadless/content/init", array($this, "register_api_field"));
-    }
-
+    //Sobreescriure funció init amb els filtres per a la integració
     function init()
     {
-        add_action("wpheadless/content/init", array($this, "_content_init"));
-    }
-
-
-    function _content_init($cpt)
-    {
-
 
         if (!is_plugin_active('js_composer/js_composer.php')) {
             return;
         }
 
+        add_action("wpheadless/content/init", array($this, "_content_init"));
+        $this->console("Register Action 'wpheadless/content/init::_content_init'");
 
-        $this->console("Loading CPT [" . $cpt . "][content_render]");
-
-        register_rest_field(
-            $cpt,
-            'content',
-            array(
-                'get_callback'    => array($this, "content_render"),
-                'update_callback' => null,
-                'schema'          => null,
-            )
-        );
-
-        $this->console("Loading CPT [" . $cpt . "][content_render_excerpt]");
-
-        register_rest_field(
-            $cpt,
-            'excerpt',
-            array(
-                'get_callback'    => array($this, "content_render_excerpt"),
-                'update_callback' => null,
-                'schema'          => null,
-            )
-        );
-    }
-
-
-
-    function content_render_excerpt($object, $field_name, $request)
-    {
-        $output = array("rendered" => "", "protected" => false);
-
-
-        $excerpt = get_post_field('post_excerpt', $object['id']);
-        $post = get_post($object['id']);
-
-        if (is_plugin_active('js_composer/js_composer.php') && preg_match('/vc_row/', $post->post_content)) {
-            WPBMap::addAllMappedShortcodes();
-        }
-
-
-        $content =  do_shortcode($post->post_content);
-        $content_st = strip_tags($content);
-        $content = wp_trim_words($content_st,25);
-        $content = str_replace(array("\n","\t"),array("",""),$content);
+        add_action("wpheadless/content", array($this, "_content_render"),20,2);
+        $this->console("Register Action 'wpheadless/content::_content_render'");
         
-        $output["rendered"] = $content;
+        // add_action("wpheadless/content/excerpt", array($this, "_content_render_excerpt"),20,2);
+        // $this->console("Register Action 'wpheadless/content/excerpt::_content_render_excerpt'");
 
-        return $output;
+
+        $this->engine = false;
     }
 
-    function content_render($object, $field_name, $request)
+    function _content_init($cpt)
     {
-        $post = get_post($object['id']);
-        $output = array("rendered" => "", "protected" => false);
+    }
 
-        global $post;
-        $post = get_post($object['id']);
-
-        if (is_plugin_active('js_composer/js_composer.php') && preg_match('/vc_row/', $post->post_content)) {
-            WPBMap::addAllMappedShortcodes();
+    private function _content_engine($post_content) {
+        if ( $this->engine ) {
+            return;
         }
-        //$output["rendered"] =  apply_filters('the_content', $post->post_content);
-        $output["rendered"] =  do_shortcode($post->post_content);
+        if (is_plugin_active('js_composer/js_composer.php') && preg_match('/vc_row/', $post_content)) {
+            WPBMap::addAllMappedShortcodes();
+            $this->engine=true;
+        }
+    }
 
-        return $output;
+
+
+    // function _content_render_excerpt($post_content , $object)
+    // {
+    //     //strip_shortcodes nomes elimina els shortcodes registrats
+    //     $this->_content_engine($post_content);
+    //     return $post_content;
+    // }
+
+    function _content_render($post_content,$object)
+    {
+        $this->_content_engine($post_content);
+        return $post_content;
     }
 }
 
