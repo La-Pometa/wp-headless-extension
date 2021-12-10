@@ -1,12 +1,13 @@
 <?php
 /*
-Plugin Name: Pometa Wordpress Headless API Extensions
+Plugin Name: Pometa Wordpress Headless API Extension
 Plugin URI: https://lapometa.com
-Description: A simple wordpress headless plugin to make your wordpress headless capable
-Version: 0.0.2
+Description: A simple wordpress plugin to make your wordpress more headless capable
+Version: 0.0.3
 Author: La Pometa
 Author URI: https://github.com/La-Pometa
-GitHub Plugin URI: La-Pometa/wp-headless-plugin
+GitHub Plugin URI: La-Pometa/pometa-wp-headless-api-extension
+Primary Branch: main
 License: GPL2
 */
 /*
