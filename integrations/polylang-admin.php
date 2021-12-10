@@ -216,10 +216,14 @@ class WPHeadlessPolylangAdmin extends Integration {
         ?>
             <style type="text/css">
                 ul.wphls-language-selector {margin: 15px 0;}
+                ul.wphls-language-selector li.selected,ul.wphls-language-selector li:hover{border:1px solid #1b1b1b;}
+
                 ul.wphls-language-selector li {display: inline-block;border: 1px solid transparent;margin-right: 15px;}
                 ul.wphls-language-selector li a:focus{box-shadow:none;}
-                ul.wphls-language-selector li a {padding: 5px;color: #aaa;text-decoration: none;display: block;outline: none;font-size: 13px;}
-                ul.wphls-language-selector li.selected,ul.wphls-language-selector li:hover {border:1px solid #ccc;}
+                ul.wphls-language-selector li a {padding: 5px;text-decoration: none;display: block;outline: none;font-size: 13px;}
+                html[data-theme="dark"] ul.wphls-language-selector li.selected,html[data-theme="dark"] ul.wphls-language-selector li:hover{border:1px solid #ccc;}
+                html[data-theme="dark"] ul.wphls-language-selector li a {color: #aaa;}
+
             </style>
             <script type="text/javascript">
                 jQuery(document).ready(function() {

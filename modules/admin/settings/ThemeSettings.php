@@ -241,24 +241,37 @@ class ThemeSettings
         ?>
         <style type="text/css">
             :root{
-                --wphl-ts-section-tab-color:#373d43;
-                --wphl-ts-section-tab-select-text-color:#373d43;
-                --wphl-ts-section-tab-select-text-active-color:#eee;
+                --wphl-ts-section-dark-tab-color:#373d43;
+                --wphl-ts-section-dark-tab-select-text-color:#373d43;
+                --wphl-ts-section-dark-tab-select-after:#fff;
+                --wphl-ts-section-dark-tab-select-text-active-color:#eee;
+                --wphl-ts-section-light-tab-color:#373d43;
+                --wphl-ts-section-light-tab-select-text-color:#373d43;
+                --wphl-ts-section-light-tab-select-text-active-color:#373d43;
+                --wphl-ts-section-light-tab-select-after:#fff;
+
             }
-            .nav-section-wrapper{display:flex;flex-direction:row;border-bottom:1px solid var(--wphl-ts-section-tab-select-text-color);margin:35px 0 25px 0}
-            .nav-section-wrapper .nav-section {margin: 0px 5px;text-decoration: none;color:#bbb;border:1px solid transparent;outline:none;border-radius:4px 4px 0px 0px;position:relative;}
-            .nav-section-wrapper .nav-section a{padding:10px 15px;color:var(--wphl-ts-section-tab-select-text-color);display:block;outline:none;text-decoration:none;box-shadow:none}
+            .nav-section-wrapper{display:flex;flex-direction:row;border-bottom:1px solid var(--wphl-ts-section-light-tab-select-text-color);margin:35px 0 25px 0}
+            .nav-section-wrapper .nav-section {margin: 0px 5px;text-decoration: none;color:#bbb;border:1px solid transparent;border-bottom:none;outline:none;border-radius:4px 4px 0px 0px;position:relative;}
+            .nav-section-wrapper .nav-section a{padding:10px 15px;display:block;outline:none;text-decoration:none;box-shadow:none}
             .nav-section-wrapper .nav-section:focus{outline:none}
-            .nav-section-wrapper .nav-section:hover, .nav-section-wrapper .nav-section.nav-section-active {border-color:var(--wphl-ts-section-tab-color) var(--wphl-ts-section-tab-color) transparent var(--wphl-ts-section-tab-color);color: var(--wphl-ts-section-tab-color);}
-            .nav-section-wrapper .nav-section:hover a, .nav-section-wrapper .nav-section.nav-section-active a{color:var(--wphl-ts-section-tab-select-text-active-color);}
+            .nav-section-wrapper .nav-section:hover, .nav-section-wrapper .nav-section.nav-section-active {border-color:var(--wphl-ts-section-light-tab-color) var(--wphl-ts-section-light-tab-color) transparent var(--wphl-ts-section-light-tab-color);color: var(--wphl-ts-section-light-tab-color);}
+            .nav-section-wrapper .nav-section:hover a, .nav-section-wrapper .nav-section.nav-section-active a{color:var(--wphl-ts-section-light-tab-select-text-active-color);}
             .nav-section-wrapper .nav-section:after{content:"";position:absolute;left:0;right:0px;height:2px;background:transparent;}
-            .nav-section-wrapper .nav-section:hover:after,.nav-section-wrapper .nav-section.nav-section-active:after{background-color:#1a1a1a}
+            .nav-section-wrapper .nav-section:hover:after,.nav-section-wrapper .nav-section.nav-section-active:after{background-color:var(--wphl-ts-section-light-tab-select-after)}
             .nav-sections-wrapper .nav-section-panel{display:none;}
             .nav-sections-wrapper .nav-section-panel.nav-section-active{display:block;}
             .nav-sections-wrapper .nav-section-panel hr:first-child {display: none;}
-            .wphl-settings-page hr{border-color:var(--wphl-ts-section-tab-color)}
-            .wphl-form h2 hr{border-color:var(--wphl-ts-section-tab-color)}
-        </style>
+            html[data-theme="dark"] .nav-section-wrapper .nav-section a{color:var(--wphl-ts-section-dark-tab-select-text-color);}
+            html[data-theme="dark"] .wphl-settings-page hr{border-color:var(--wphl-ts-section-dark-tab-color)}
+            html[data-theme="dark"] .nav-section-wrapper .nav-section{border-color:var(--wphl-ts-section-dark-tab-color)}
+            html[data-theme="dark"] .wphl-form h2 hr{border-color:var(--wphl-ts-section-dark-tab-color)}
+            html[data-theme="dark"] .nav-section-wrapper{border-color: var(--wphl-ts-section-dark-tab-select-text-color);}
+            html[data-theme="dark"] .nav-section-wrapper .nav-section:hover,html[data-theme="dark"] .nav-section-wrapper .nav-section.nav-section-active {border-color:var(--wphl-ts-section-dark-tab-color) var(--wphl-ts-section-dark-tab-color) transparent var(--wphl-ts-section-dark-tab-color);color: var(--wphl-ts-section-dark-tab-color);}
+            html[data-theme="dark"] .nav-section-wrapper .nav-section:hover a,html[data-theme="dark"] .nav-section-wrapper .nav-section.nav-section-active a{color:var(--wphl-ts-section-dark-tab-select-text-active-color);}
+            html[data-theme="dark"] .nav-section-wrapper .nav-section:hover:after,html[data-theme="dark"] .nav-section-wrapper .nav-section.nav-section-active:after{background-color:var(--uip-body-background)}
+
+       </style>
         <?php
     }
 

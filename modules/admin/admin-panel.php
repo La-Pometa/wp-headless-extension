@@ -151,11 +151,15 @@ class WPHeadlessAdminPanel extends WPHeadlessModules
         do_action("wpheadless/settings/js", $this);
         ?>
         <style type="text/css">
-           .wphl-form h2{color:#eee;font-size:120%;}
-           .wphl-settings-page h1 {font-size: 200%;color: #aaa;}
-           .wphl-settings-page h2 {font-size: 150%;color: #aaa;}
-           .wphl-settings-page h3 {font-size: 125%;color: #aaa;}
-           .wphl-settings-page hr {border-color: #666;}
+           .wphl-form h2{font-size:120%;}
+           .wphl-settings-page h1 {font-size: 200%;}
+           .wphl-settings-page h2 {font-size: 150%;}
+           .wphl-settings-page h3 {font-size: 125%;}
+           html[data-theme="dark"] .wphl-form h2{color:#eee;}
+           html[data-theme="dark"] .wphl-settings-page h1{color: #aaa;}
+           html[data-theme="dark"] .wphl-settings-page h2{color: #aaa;}
+           html[data-theme="dark"] .wphl-settings-page h3{color: #aaa;}
+           html[data-theme="dark"] .wphl-settings-page hr {border-color: #666;}
         </style>
         </div>
         <form method="post" class="wphl-form" action="options.php">
