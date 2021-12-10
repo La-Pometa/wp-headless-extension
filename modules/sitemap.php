@@ -7,8 +7,6 @@ function wpheadless_sitemap_load_module($modules) {
 }
 
 
-
-
 class WPHeadlessSitemap extends WPHeadlessModule {
 
 		public function __construct()

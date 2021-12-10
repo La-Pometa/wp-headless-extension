@@ -11,7 +11,7 @@ class WPHeadlessContent extends WPHeadlessModule
 	public function __construct()
 	{
 
-		add_action("init", array($this, "init"));
+		add_action("init", array($this, "init") );
 		add_filter("the_content", array($this, "_filter_content"),20);
 		add_filter("wpheadless/archive",array($this,"_headless_archive"),20,3);
 	}
@@ -262,18 +262,3 @@ class WPHeadlessContent extends WPHeadlessModule
 
 
 
-
-
-
-function so_45027789_rest_prepare_post($data, $post, $request)
-{
-    $params = $request->get_params();
-    if(isset($params['_minimal'])) {
-        foreach($data->get_links() as $_linkKey => $_linkVal) {
-            $data->remove_link($_linkKey);
-        }
-    }
-    return $data;
-}
-
-add_filter('rest_prepare_post', 'so_45027789_rest_prepare_post', 1, 3);

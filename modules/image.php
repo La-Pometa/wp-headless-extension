@@ -1,6 +1,5 @@
 <?php
 
-
 class WPHeadlessImage extends WPHeadlessModule {
 
 		public function __construct()

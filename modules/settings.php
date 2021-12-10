@@ -8,7 +8,6 @@ function wpheadless_settings_load_module($modules)
     return $modules;
 }
 
-
 class WPHeadlessSettings extends WPHeadlessModule
 {
 

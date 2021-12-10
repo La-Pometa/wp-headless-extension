@@ -216,9 +216,7 @@ class WPHeadlessPolyLang extends WPHeadlessModule
 }
 
 /*-
-
 Filtres per a REST API 
-
 -*/
 
 

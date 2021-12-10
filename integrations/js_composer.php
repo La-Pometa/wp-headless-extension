@@ -6,7 +6,7 @@
     Plugin Name: WPHeadless-Integration WPBakery/Visual Composer
     Plugin URI: https://www.lapometa.com/headless
     Description: Integració WPBakery/Visual Composer amb API REST
-    Version: 0.0.1
+    Version: 0.0.2
     Author: WPHeadless
     Text Domain: wpheadlessltd
     RequiresPHP: 7.4.2

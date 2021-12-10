@@ -16,7 +16,7 @@ class WPHeadlessModules
     private $shortcodes = array();
     private $modules_path = false;
     private $modules = array();
-    private $module_name = "modules";
+    private $module_name = "modules" ;
     var $debug = false;
 	var $request_type = false;
     private $WPHeadlessInstance=false;

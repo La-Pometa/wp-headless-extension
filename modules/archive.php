@@ -8,8 +8,6 @@ function wpheadless_archive_load_module($modules)
 }
 
 
-
-
 final class WPHeadlessArchive extends WPHeadlessModule
 {
 

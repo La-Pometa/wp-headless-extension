@@ -13,7 +13,6 @@ class WPHeadlessPath extends WPHeadlessModule {
 
         function __construct() {
 
-
                 add_action("wpheadless/routes/new",array($this,"init_routes"));
 
         }

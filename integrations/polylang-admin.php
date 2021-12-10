@@ -47,7 +47,6 @@ function wpheadless_themesettings_modules_vendor_polylang_admin_info($modules) {
 }
 
 
-
 add_action("wpheadless/settings/input/id","_polylang_admin_input_id",2500);
 
 function _polylang_admin_input_id($id) {

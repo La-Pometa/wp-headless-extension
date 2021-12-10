@@ -11,7 +11,6 @@ class WPHeadlessRoutes extends WPHeadlessModule {
 
     }
 
-
     function init_new_routes() {
 
         /* Registrar noves routes */
