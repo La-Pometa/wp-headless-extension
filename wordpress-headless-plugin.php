@@ -7,6 +7,7 @@ Version: 0.0.3
 Author: La Pometa
 Author URI: https://github.com/La-Pometa
 GitHub Plugin URI: La-Pometa/wp-headless-plugin
+Primary Branch: main
 License: GPL2
 */
 /*
