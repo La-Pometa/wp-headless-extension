@@ -5,7 +5,6 @@ class WPHeadlessContent extends WPHeadlessModule
 {
 
 
-	static $instance = false;
 	var $excerpt = "";
 
 
@@ -17,7 +16,7 @@ class WPHeadlessContent extends WPHeadlessModule
 
 	function content_render_post_meta($object, $field_name, WP_REST_Request $request)
 	{
-
+		//echo "<br> POST TYPE[".$this->get_instance()->get_request_type()."]";
 		if ( $this->is_post_archive()) {
 			if (!apply_filters("wpheadless/rest/content/list/post_meta/include", false, array("object" => $object, "request" => $request))) {
 				return false;

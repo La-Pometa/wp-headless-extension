@@ -13,19 +13,29 @@ class WPHeadlessPath extends WPHeadlessModule {
 
         function init() {
 
+				$this->console("Register ::init_routes");
                 add_action("wpheadless/routes/new",array($this,"init_routes"));
 
+
+				add_filter("wpheadless/request/type/filter",array($this,"_request_type"),20,2);
         }
 
 
+		function _request_type($type,$call) {
 
+			if ( $call == "path") {
+				$type = "single";
+			}
+
+			return $type;
+		}
 
 
 		function init_routes() {
-            $this->console("Loading Route [path]");
 
+			$this->console("Loading Route [path]");
 			register_rest_route( 'wp/v2', '/path/', array(
-		        'methods' => 'GET',
+				'methods' => WP_REST_Server::READABLE,
 		        'callback' => array($this,"get_content_by_path"),
 				'permission_callback' => '__return_true',
 		        'args' => array(
@@ -34,27 +44,29 @@ class WPHeadlessPath extends WPHeadlessModule {
 		            )
 		        )
 		    ) );
+
 		}
 		function get_content_by_path(WP_REST_Request $request ) {
+			
 			// get slug from request
 			$slug = get_array_value($_GET,'slug',false);
 			$lang = get_array_value($_GET,'lang',"es");
 			$translate = get_array_value($_GET,'translate',"");
 			$content="";
 			$ret= array();
-			$response["path"]=array(
-				 "count"=>0,
-				 "slug"=>$slug,
-				 "lang"=>$lang,
-				 "ids"=>array(),
-				 "item"=>array()
-			);
+			// $response["path"]=array(
+			// 	 "count"=>0,
+			// 	 "slug"=>$slug,
+			// 	 "lang"=>$lang,
+			// 	 "ids"=>array(),
+			// 	 "item"=>array()
+			// );
 
 
 			if ( !$slug ) {
 
 				$post_id = apply_filters("wpheadless/rest/path/frontpage",false);
-				$response["path"]["frontpage"]=$post_id;
+				// $response["path"]["frontpage"]=$post_id;
 
 				if ( !$post_id ) {
 					$post_id = get_option('page_on_front');
@@ -66,7 +78,7 @@ class WPHeadlessPath extends WPHeadlessModule {
 
 					$request = new WP_REST_Request( 'GET', '/wp/v2/pages/'.$post_id );
 					$request_resp = rest_do_request( $request );
-					$response["path"]["ids"][]=$post_id;
+					// $response["path"]["ids"][]=$post_id;
 					//$response["path"]["item"][]=get_object_value($request_resp,"data",false);
 					$ret=get_object_value($request_resp,"data",false);
 
@@ -132,7 +144,7 @@ class WPHeadlessPath extends WPHeadlessModule {
 			}
 
 
-			$response["path"]["count"]=count(get_array_value($response["path"],"ids",array()));
+			// $response["path"]["count"]=count(get_array_value($response["path"],"ids",array()));
 
 			//return $response;
 			return $ret;

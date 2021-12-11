@@ -43,8 +43,11 @@ if (!class_exists('WP_Headless')) {
          */
         private WPHeadlessModules $Modules;
 
-
+        private string $request_type = "";
         private bool $debug = false;
+        private array $debug_buffer = array();
+        private float $debug_start=0;
+        private $request= false;
 
         /**
          * Construct the plugin object
@@ -53,40 +56,57 @@ if (!class_exists('WP_Headless')) {
         {
 
 
-            // Filter Request 
-            $this->_filter_request();
-
-
-            // Initialize Settings
-            require_once(sprintf("%s/modules/module.php", dirname(__FILE__)));
-            $this->Modules = new WPHeadlessModules();
-
+            // Debug info
+            $this->debug_start = $this->microtime(true);
             if (get_array_value($_GET, "debug", false) !== false) {
                 $this->debug=true;
-                $this->Modules->setDebug(true);
             }
 
-            require_once(sprintf("%s/modules/IntegrationsLoader.php", dirname(__FILE__)));
+            // Registrar crides a post_types: per a determinar el tipus de request
+            add_filter('rest_post_dispatch',array($this,'_post_dispatch'),2000,3);
+
+            // Registrar Mòduls
+            $this->console("boot","Registrar mòduls->inici");
+            $this->require("/modules/module.php");
+            $this->Modules = new WPHeadlessModules($this);
+            $this->console("boot","Registrar mòduls->final");
+
+            // Registrar Integracions
+            $this->console("boot","Registrar Integracions->inici");
+            $this->require("/modules/IntegrationsLoader.php");
             $this->Integrations = new IntegrationsLoader();
+            $this->console("boot","Registrar Integracions->final");
 
-            //Carrega Vendors
+            // Carregar Integracions
+            $this->console("boot","Carregar Integracions->inici");
             $this->Integrations->load();
+            $this->console("boot","Carregar Integracions->final");
 
-
-            //Carrega Mòduls + Vendor Mòduls
+            // Carregar Mòduls + Vendor Mòduls
+            $this->console("boot","Carregar Mòduls->inici");
             $this->Modules->load($this);
+            $this->console("boot","Carregar Mòduls->final");
 
-            $plugin = plugin_basename(__FILE__);
-            add_filter("plugin_action_links_$plugin", array($this, 'plugin_settings_link'));
 
+            $this->_get_request_info();
+
+
+            // Carregar apartat administrador, si estic a l'administrador
             $this->IntegrationsAdmin=false;
             if ( is_admin()) {
+
+                // Menu 'Plugins'; afegir 'Settings'
+                $this->console("boot","Registrar settings");
+                $plugin = plugin_basename(__FILE__);
+                add_filter("plugin_action_links_$plugin", array($this, 'plugin_settings_link'));
+
+
+                $this->console("boot","Registrar Administrador");
                 // Estic a l'administrador? Carregar ThemeSettings 
                 $this->Integrations->loadAdmin();
                 $this->Integrations->loadAdminFilters();
 
             }
-
 
         } // END public function __construct
 
@@ -113,33 +133,124 @@ if (!class_exists('WP_Headless')) {
             array_unshift($links, $settings_link);
             return $links;
         }
-
-        function _filter_request() {
-            $path= get_array_value($_SERVER,"PATH_INFO","/");
-            $request = new WP_REST_Request( $_SERVER['REQUEST_METHOD'], $path );
-            $request->set_query_params( wp_unslash( $_GET ) );
-            $request->set_body_params( wp_unslash( $_POST ) );
-            $request->set_file_params( $_FILES );
-
-            $this->request_type="single";
-            if (get_array_value($request->get_params(), "id", false) == false) {
-
-                    $this->request_type="archive";
-            }
+        function _filter_content_init($post_type) {
+            add_filter('rest_' . $post_type . '_query', array($this, '_filter_content_type'), 5, 2);
+        }
+        function require($file) {
+            $this->console("root"," * require_file($file)->inici");
+            require_once(sprintf("%s/".$file, dirname(__FILE__)));
+            $this->console("root"," * require_file($file)->final");
 
         }
+
+        // Setter request_type
         function set_request_type($type) : void {
             $this->request_type=$type;
         }
+
+        // Getter request_type
         function get_request_type() : string {
             return $this->request_type;
         }
-        function getDebug() {
-            return $this->debug;
+
+        function microtime() {
+            return round(microtime(true)*1000,2);
         }
+
+        function _get_request_info() {
+            $this->console("root","wpheadless/request/type/action->inici");
+
+            $rest_call = get_array_value($_SERVER,"REDIRECT_URL","");
+            $pre = site_url()."/wp-json/wp/v2/";
+            $pre2 = parse_url($pre);
+            $pre = get_array_value($pre2,"path","");
+            $call = str_replace($pre,"",$rest_call);
+            $call = ((substr($call,strlen($call)-1,1)=="/") ? substr($call,0,strlen($call)-1) : $call);
+
+            $this->console("root","wpheadless/request/call ".$call);
+
+            $this->call = explode("/",$call);
+            $type = "single";
+            if ( count($this->call) == 1 ) {
+                $type = "archive";
+            }
+            $this->set_request_type(apply_filters("wpheadless/request/type/filter",$type,$call));
+            do_action("wpheadless/request/type/action",$this->get_request_type());
+            $this->console("root","wpheadless/request/type/action '".$this->get_request_type()."'");
+
+            $this->console("root","wpheadless/request/type/action->final");
+    }
+
+
+        // Mostrar informació de Debug
+        // TODO: Integrair dins de la WP_Rest_Respnse
+        function console($module_name,$string) {
+            if ($this->debug) {
+                $time = $this->microtime(true) - $this->debug_start;
+                $time = sprintf("% 5d",$time);
+                $string = apply_filters("wpheadless/console/string",$string,$module_name,$string);
+                $module = sprintf("%s",str_pad($module_name,25," "));
+                $string = sprintf(__("[%sms] PometaHeadless::%s %s","wpheadlesltd"),$time,$module,$string);
+                $this->debug_buffer[]=$string;
+                //echo "\n".$string;
+            }
+        }
+
+
+        // Acció abans d'enviar les dades (debug, cache, ...)
+        function _post_dispatch($object, $server, $request ) {
+
+                $this->console("root","Dispatch Start");
+           // echo "<br> OBJECT:<pre>".print_r($object,true)."</pre>";
+                $object = apply_filters("wpheadless/dispatch",$object,$this);
+                $this->console("root","Dispatch End");
+                if ( count($this->debug_buffer)) {
+                    $object->data["debug"]=$this->debug_buffer;
+                }
+                return $object;
+
+        }
+
+
     } // END class WP_Plugin_Template
 } // END if(!class_exists('WP_Plugin_Template'))
 
+
+
+add_action("wpheadless/request/type/action","wpheadless_archive_show_type_info");
+function wpheadless_archive_show_type_info($type) {
+   // echo "<br> SET REQUEST TYPE['".$type."']";
+}
+
+add_action("wpheadless/request/type/action","wpheadless_archive_set_request_fields");
+function wpheadless_archive_set_request_fields($type) {
+        if ( $type == "archive" ) {
+            $_GET["_fields"]=array("slug","content","excerpt","title","categories","featured_media","featured_source");
+            $_GET["embedded"]=1;
+        }
+}
+
+add_filter("wpheadless/console/string","wpheadless_console_string",50,3);
+function wpheadless_console_string($output,$module_name,$string) {
+
+    if ( $module_name == "boot" ) {
+        $output="### [".$output."] ###";
+    }
+    else if ( $module_name == "modules") {
+        $output="--> ".$output;
+    }
+    else {
+        $piece = substr($string,0,strpos($string," ",0));
+        if ( $piece == strtoupper($piece)) {
+            $output="    @ ".$output;
+        }
+        else {
+            $output="    @ -> ".$output;
+
+        }
+    }
+    return $output;
+}
 
 
 if (class_exists('WP_Headless')) {
@@ -150,4 +261,3 @@ if (class_exists('WP_Headless')) {
     // instantiate the plugin class
     $wp_plugin_template = new WP_Headless();
 }
-

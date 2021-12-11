@@ -14,10 +14,17 @@ class WPHeadlessSettings extends WPHeadlessModule
 
     public function __construct()
     {
-        parent::__construct();
-
         add_action("wpheadless/routes/new", array($this, "init_routes"));
+        add_filter("wpheadless/request/type/filter",array($this,"_request_type"),20,2);
 
+    }
+    function _request_type($type,$call) {
+
+        if ( $call == "settings") {
+            $type = "single";
+        }
+
+        return $type;
     }
 
     function init_routes()
@@ -26,7 +33,7 @@ class WPHeadlessSettings extends WPHeadlessModule
 
         $this->console("Loading Route [settings]");
         register_rest_route('wp/v2', '/settings/', array(
-            'methods' => 'GET',
+            'methods' => WP_REST_Server::READABLE,
             'callback' => array($this, "get_settings_response"),
             'permission_callback' => '__return_true',
             'args' => array(

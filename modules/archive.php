@@ -11,9 +11,8 @@ function wpheadless_archive_load_module($modules)
 final class WPHeadlessArchive extends WPHeadlessModule
 {
 
-    public function __construct()
+    public function init()
     {
-        parent::__construct();
         add_action("wpheadless/content/init", array($this, "init_archive"));
     }
 
@@ -22,5 +21,7 @@ final class WPHeadlessArchive extends WPHeadlessModule
     {
 
         $this->console("Loading CPT [" . $cpt . "][meta_seo]");
+
     }
 }
+

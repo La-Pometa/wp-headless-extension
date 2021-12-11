@@ -56,14 +56,12 @@ class WPHeadlessPolyLang extends WPHeadlessModule
 
         // Check if polylang is installed
         require_once ABSPATH . 'wp-admin/includes/plugin.php';
-
-        
         if (!is_plugin_active('polylang/polylang.php')) {
             return;
         }
 
-        add_action('rest_api_init', array($this, 'rest_init'), 0);
-        add_action('rest_api_init', array($this, '_change_rest_lang_server'), 100, 3);
+        //add_action('rest_api_init', array($this, 'rest_init'), 0);
+        // add_action('rest_api_init', array($this, '_change_rest_lang_server'), 100, 3);
 
         add_action("wpheadless/content/init", array($this, "register_api_field"));
     }
@@ -106,12 +104,10 @@ class WPHeadlessPolyLang extends WPHeadlessModule
     public function register_api_field($post_type)
     {
 
-        $post_type_rest = $post_type;
-        $this->console("Binding 'rest_" . $post_type_rest . "_query' ");
-        add_filter('rest_' . $post_type_rest . '_query', array($this, '_change_rest_lang'), 10, 2);
+        $this->console("Binding 'rest_" . $post_type . "_query' ");
+        add_filter('rest_' . $post_type . '_query', array($this, '_change_rest_lang'), 10, 2);
 
         $this->console("Loading CPT [" . $post_type . "][current_lang]");
-
         register_rest_field(
             $post_type,
             "current_lang",
@@ -122,7 +118,6 @@ class WPHeadlessPolyLang extends WPHeadlessModule
         );
 
         $this->console("Loading CPT [" . $post_type . "][get_translations]");
-
         register_rest_field(
             $post_type,
             "translations",
@@ -181,17 +176,17 @@ class WPHeadlessPolyLang extends WPHeadlessModule
         }, array());
     }
 
-    function _change_rest_lang_server()
-    {
-        register_rest_field("type", "test", ['get_callback' => function ($params) {
-            return $params['slug'];
-        }]);
+    // function _change_rest_lang_server()
+    // {
+    //     register_rest_field("type", "test", ['get_callback' => function ($params) {
+    //         return $params['slug'];
+    //     }]);
 
-        add_filter('wpseo_frontend_presentation', function ($presentation, $context) {
+    //     add_filter('wpseo_frontend_presentation', function ($presentation, $context) {
 
-            return $presentation;
-        }, 100, 2);
-    }
+    //         return $presentation;
+    //     }, 100, 2);
+    // }
 
     function _change_rest_lang($args, $request)
     {
@@ -210,7 +205,6 @@ class WPHeadlessPolyLang extends WPHeadlessModule
         if (!isset($_GET["translate"])) {
             $_GET["translate"] = $lang;
         }
-
         return $args;
     }
 }
@@ -233,6 +227,6 @@ function wpheadless_vendor_polylang_replace_lang($vars)
 
     $lang = get_array_value($vars, "lang", pll_default_language());
 
-    echo "LANG!!!! [" . $lang . "] [" . get_array_value($vars, "lang", "novalue") . "]";
+    // echo "LANG!!!! [" . $lang . "] [" . get_array_value($vars, "lang", "novalue") . "]";
     return $vars;
 }

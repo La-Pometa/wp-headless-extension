@@ -17,22 +17,14 @@ class WPHeadlessModules
     private $modules_path = false;
     private $modules = array();
     private $module_name = "modules" ;
-    var $debug = false;
-	var $request_type = false;
-    private $WPHeadlessInstance=false;
+    var $request_type = false;
+    private $instance = false;
 
-    public function __construct($module_name = "")
+    public function __construct($instance = "")
     {
         global $request;
-        add_action('plugins_loaded', array($this, 'init'), 0);
-        $this->module_name = $module_name;
-    }
- 
-    function setDebug($debug) {
-        $this->debug = $debug;
-    }
-    function init()
-    {
+        $this->module_name = "modules";
+        $this->instance = $instance;
     }
 
     function load(WP_Headless $headless)
@@ -40,7 +32,9 @@ class WPHeadlessModules
         $this->register_modules($headless);
         $this->register_shortcodes();
     }
-
+    function get_instance() {
+        return $this->instance;
+    }
     function register_modules($headless)
     {
         $modules = array(
@@ -54,23 +48,20 @@ class WPHeadlessModules
 
             //Carregar mòdul
             if (!class_exists($module_class)) {
-                $this->console("REGISTER MODULE ERROR (CLASS NOT FOUND) [" . $module . "] {" . $module_class . "}");
+                $this->console("modules","REGISTER MODULE ERROR (CLASS NOT FOUND) [" . $module . "] {" . $module_class . "}");
             } else {
-                $this->console("REGISTER MODULE[" . $module . "] {" . $module_class . "}");
+                $this->console("modules","REGISTER MODULE[" . $module . "] {" . $module_class . "}");
                 $this->modules[$module] = new $module_class();
                 $this->modules[$module]->setInstance($headless);
                 $this->modules[$module]->integration_id = $module;
                 $this->modules[$module]->start($module, $module_class);
             }
         }
-    }
+    }  
 
-    public function console($string)
+    public function console($module_name,$string)
     {
-        $debug = $this->debug;
-        if ($debug) {
-            echo "\n<br> [WPHeadless::" . ($this->module_name ? "Module::" . $this->module_name . "" : "Modules") . "] '" . $string . "'";
-        }
+        $this->get_instance()->console($module_name,$string);
     }
 
 
@@ -107,20 +98,15 @@ class WPHeadlessModule {
     function init() {
         $this->console("Function 'init' must be override on final class");
     }
-    public function getDebug() {
-        if ( !$this->instance ) {
-            $this->console("Error getDebug() => INSTANCE WP_Headless = NULL");
-            return false;
-        }
-        return $this->instance->getDebug();
-    }
 
     public function console($string)
     {
-
-        if ($this->getDebug()) {
-            echo "\n<br> [WPHeadless::" . ($this->module_name ? "Module::" . $this->module_name . "" : "Modules") . "] '" . $string . "'";
+        if ( !$this->get_instance() ) {
+            //$this->console("Error console() => INSTANCE WP_Headless = NULL");
+            return false;
         }
+        return $this->get_instance()->console("module(".$this->module_name.")",$string);
+
     }
 
     function setInstance($instance) {
@@ -141,26 +127,29 @@ class WPHeadlessModule {
         $this->console("START module '" . $this->module_class . "::" . $this->module_name . "'");
         $this->init();
     }
+    public function get_instance() {
+        return $this->instance;
+    }
     function set_request_type($type="") {
-        if ( !$this->instance ) {
-            $this->console("Error SET_REQUEST_TYPE(".$type.") INSTANCE WP_Headless = NULL");
+        if ( !$this->get_instance() ) {
+            $this->console("modules","Error SET_REQUEST_TYPE(".$type.") INSTANCE WP_Headless = NULL");
             return;
         }
-		$this->instance->set_request_type($type);
+		$this->get_instance()->set_request_type($type);
 	}
 	function is_post_single() {
-        if ( !$this->instance ) {
+        if ( !$this->get_instance()) {
             $this->console("Error GET_REQUEST_TYPE(is_single) INSTANCE WP_Headless = NULL");
             return false;
         }
-        return ($this->instance->get_request_type() == "single");
+        return ($this->get_instance()->get_request_type() == "single");
     }
     function is_post_archive() {
-        if ( !$this->instance ) {
-            $this->console("Error GET_REQUEST_TYPE(is_archive) INSTANCE WP_Headless = NULL");
+        if ( !$this->get_instance() ) {
+            $this->console("modules","Error GET_REQUEST_TYPE(is_archive) INSTANCE WP_Headless = NULL");
             return false;
         }
-        return ($this->instance->get_request_type() == "archive");
+        return ($this->get_instance()->get_request_type() == "archive");
     } 
 
 }
