@@ -105,7 +105,7 @@ class WPHeadlessModule {
     }
 
     function init() {
-        $this->console("Function must be override on final class");
+        $this->console("Function 'init' must be override on final class");
     }
     public function getDebug() {
         if ( !$this->instance ) {

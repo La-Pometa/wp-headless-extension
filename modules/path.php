@@ -11,7 +11,7 @@ function wpheadless_path_load_module($modules) {
 class WPHeadlessPath extends WPHeadlessModule {
 
 
-        function __construct() {
+        function init() {
 
                 add_action("wpheadless/routes/new",array($this,"init_routes"));
 

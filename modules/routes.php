@@ -3,10 +3,7 @@
 
 class WPHeadlessRoutes extends WPHeadlessModule {
 
-    var $debug=false;
-
-    function __construct() {
-        $this->debug=false;
+    function init() {
         add_action("rest_api_init",array($this,"init_new_routes"));
 
     }
@@ -15,7 +12,7 @@ class WPHeadlessRoutes extends WPHeadlessModule {
 
         /* Registrar noves routes */
 
-        $this->console("Loading Routes...",$this->debug);
+        $this->console("Loading Routes...");
         do_action("wpheadless/routes/new");
 
     }

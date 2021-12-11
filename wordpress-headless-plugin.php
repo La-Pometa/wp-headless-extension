@@ -121,11 +121,12 @@ if (!class_exists('WP_Headless')) {
             $request->set_body_params( wp_unslash( $_POST ) );
             $request->set_file_params( $_FILES );
 
-
+            $this->request_type="single";
             if (get_array_value($request->get_params(), "id", false) == false) {
 
                     $this->request_type="archive";
             }
+
         }
         function set_request_type($type) : void {
             $this->request_type=$type;

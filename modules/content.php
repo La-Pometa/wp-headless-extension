@@ -8,13 +8,6 @@ class WPHeadlessContent extends WPHeadlessModule
 	static $instance = false;
 	var $excerpt = "";
 
-	public function __construct()
-	{
-
-		add_action("init", array($this, "init") );
-		add_filter("the_content", array($this, "_filter_content"),20);
-		add_filter("wpheadless/archive",array($this,"_headless_archive"),20,3);
-	}
 
 	function _filter_content($content)
 	{	
@@ -91,7 +84,14 @@ class WPHeadlessContent extends WPHeadlessModule
 
 		return $ret;
 	}
-
+	function _post_dispatch($object, $server, $request) {
+		if ( $this->is_post_archive()) {
+			$responseData = $object->get_data();
+		 	$responseData = apply_filters("wpheadless/archive",array("data"=>$responseData),$object,$request);
+		 	$object->set_data($responseData);
+		}
+		return $object;
+	}
 
 	function content_render_author_objects($object, $field_name, $request)
 	{
@@ -122,17 +122,11 @@ class WPHeadlessContent extends WPHeadlessModule
 	function init()
 	{
 
-		add_filter('rest_post_dispatch', function ($object, $server, $request) {
-			if (!get_array_value($request->get_params(), "per_page", false)) return $object;
+		// remove_filter('the_excerpt', 'wpautop');
+		add_filter('rest_post_dispatch',array($this,'_post_dispatch'),200,3);
+		add_filter("the_content", array($this, "_filter_content"),20);
+		add_filter("wpheadless/archive",array($this,"_headless_archive"),20,3);
 
-			$responseData = $object->get_data();
-			$newResponse = apply_filters("wpheadless/archive",$responseData,$object,$request);
-			$object->set_data($newResponse);
-			return $object;
-		}, 200, 3);
-
-
-		remove_filter('the_excerpt', 'wpautop');
 
 		global $wp_post_types;
 		$posttypes = array_keys($wp_post_types);
@@ -243,7 +237,7 @@ class WPHeadlessContent extends WPHeadlessModule
 
 		$this->excerpt = $post_content;
         if ( $this->is_post_archive()) {
-			//$post_content = "";
+			$post_content = "~";
         }
 		$post_content = apply_filters("wpheadless/content",$post_content,$object);
 		$post_content = do_shortcode($post_content);
