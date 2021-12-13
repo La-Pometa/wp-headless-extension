@@ -66,7 +66,12 @@ class IntegrationsLoader
     }
     public function loadAdminFilters() {
         foreach($this->integrationsAdmin as $integration_id => $integration_class) {
-            $this->integrationsAdmin[$integration_id]->init();
+            if ( property_exists($this->integrationsAdmin[$integration_id],"init") ) {
+                $this->integrationsAdmin[$integration_id]->init();
+            }
+            // else {
+            //     echo "<br> Integrations loadAdminFilters() [".$integration_id."] no has init()";
+            // }
         }
     }
 

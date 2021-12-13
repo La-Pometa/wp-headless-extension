@@ -1,7 +1,6 @@
 <?php
 
 
-require_once("admin/admin-panel.php");
 require_once("settings.php");
 require_once("sitemap.php");
 require_once("image.php");

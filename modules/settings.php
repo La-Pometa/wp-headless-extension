@@ -47,6 +47,19 @@ class WPHeadlessSettings extends WPHeadlessModule
 
     function get_settings_response(WP_REST_Request $request)
     {
+
+
+        do_action("wpheadless/settings/load-settings-ret");
+
+        $settings = get_option("wpheadless_settings");
+
+
+        $settings_parts = apply_filters("wpheadless/settings/tabs",array());
+
+        echo "<br> SETTINGS:<pre>".print_r($settings,true)."</pre>";
+
+
+
         $_req = array();
         $_req["settings"] = array();
         $_req["settings"]["ca"] = array();

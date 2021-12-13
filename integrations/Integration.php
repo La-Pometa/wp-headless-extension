@@ -51,6 +51,7 @@ abstract class Integration implements IntegrationInterface
     }
 
 
-
+    public function init() {
+    }
     
 }
