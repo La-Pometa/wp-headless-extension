@@ -29,7 +29,7 @@ class IntegrationsLoader
                 $integration = str_replace(array($this->get_path(), ".php"), array("", ""), $file);
                 $this->integrationsFile[$integration] = $file;
                 $this->integrations[$integration] = $file;
-                add_action('admin_init', function(){
+                add_action('admin_init', function() use ($file){
                     require_once($file);
                 });
             }
