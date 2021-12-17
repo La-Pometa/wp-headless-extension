@@ -53,6 +53,15 @@ class WPHeadlessPolyLang extends WPHeadlessModule
 
     public function init()
     {
+       
+        // Modificar el idioma de la REST API
+        add_action('rest_api_init',[$this, 'rest_init'], 0);
+        
+        // Abans d'afegir els filtres, comprovar que el plugin estigui actiu; solament després de "init"
+        add_action("init",[$this,"_init_filters"]);
+    }
+
+    function _init_filters() {
 
         // Check if polylang is installed
         require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -60,12 +69,8 @@ class WPHeadlessPolyLang extends WPHeadlessModule
             return;
         }
 
-        //add_action('rest_api_init', array($this, 'rest_init'), 0);
-        // add_action('rest_api_init', array($this, '_change_rest_lang_server'), 100, 3);
-
-        add_action("wpheadless/content/init", array($this, "register_api_field"));
+        add_action("wpheadless/content/init", [$this, "register_api_field"] );
     }
-
 
     public function rest_init()
     {
@@ -105,14 +110,14 @@ class WPHeadlessPolyLang extends WPHeadlessModule
     {
 
         $this->console("Binding 'rest_" . $post_type . "_query' ");
-        add_filter('rest_' . $post_type . '_query', array($this, '_change_rest_lang'), 10, 2);
+        add_filter('rest_' . $post_type . '_query', [$this, '_change_rest_lang'], 10, 2);
 
         $this->console("Loading CPT [" . $post_type . "][current_lang]");
         register_rest_field(
             $post_type,
             "current_lang",
             array(
-                "get_callback" => array($this, "get_current_lang"),
+                "get_callback" => [$this, "get_current_lang"],
                 "schema" => null,
             )
         );
@@ -122,7 +127,7 @@ class WPHeadlessPolyLang extends WPHeadlessModule
             $post_type,
             "translations",
             array(
-                "get_callback" => array($this, "get_translations"),
+                "get_callback" => [$this, "get_translations"],
                 "schema" => null,
             )
         );
@@ -175,18 +180,6 @@ class WPHeadlessPolyLang extends WPHeadlessModule
             return $carry;
         }, array());
     }
-
-    // function _change_rest_lang_server()
-    // {
-    //     register_rest_field("type", "test", ['get_callback' => function ($params) {
-    //         return $params['slug'];
-    //     }]);
-
-    //     add_filter('wpseo_frontend_presentation', function ($presentation, $context) {
-
-    //         return $presentation;
-    //     }, 100, 2);
-    // }
 
     function _change_rest_lang($args, $request)
     {
