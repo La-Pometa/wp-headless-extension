@@ -47,20 +47,18 @@ class WPHeadlessPath extends WPHeadlessModule {
 
 		}
 		function get_content_by_path(WP_REST_Request $request ) {
-			
-			// get slug from request
+
 			$slug = get_array_value($_GET,'slug',false);
 			$lang = get_array_value($_GET,'lang',"es");
 			$translate = get_array_value($_GET,'translate',"");
 			$content="";
 			$ret= array();
-			// $response["path"]=array(
-			// 	 "count"=>0,
-			// 	 "slug"=>$slug,
-			// 	 "lang"=>$lang,
-			// 	 "ids"=>array(),
-			// 	 "item"=>array()
-			// );
+
+			
+			$embed = false;
+			if ( get_array_value($_GET,"_embed",false) !== false ) {
+				 $embed = true;
+			}
 
 
 			if ( !$slug ) {
@@ -76,11 +74,16 @@ class WPHeadlessPath extends WPHeadlessModule {
 				if ( $post_id ) {
 					$post_id = pll_get_post($post_id,$lang);
 
-					$request = new WP_REST_Request( 'GET', '/wp/v2/pages/'.$post_id );
+					$request = new WP_REST_Request( 'GET', '/wp/v2/pages/'.$post_id  , $_GET);
+
 					$request_resp = rest_do_request( $request );
-					// $response["path"]["ids"][]=$post_id;
-					//$response["path"]["item"][]=get_object_value($request_resp,"data",false);
 					$ret=get_object_value($request_resp,"data",false);
+
+					// Embed ?
+					if ( $embed ) {
+						global $wp_rest_server;
+						$ret= $wp_rest_server->response_to_data($request_resp, $embed);
+					}
 
 				}
 
@@ -122,13 +125,16 @@ class WPHeadlessPath extends WPHeadlessModule {
 							if ( $request_str ) {
 								$request_resp = new WP_REST_Request( 'GET' , $request_str );
 								$request_resp = rest_do_request( $request_resp );
-								$response["path"]["item"][]=get_object_value($request_resp,"data",false);
-								
+							
 								$ret=get_object_value($request_resp,"data",false);
 
+								// Embed ?
+								if ( $embed ) {
+									global $wp_rest_server;
+									$ret= $wp_rest_server->response_to_data($request_resp, $embed);
+								}
 
-	
-
+								
 							}
 
 							
