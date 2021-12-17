@@ -149,6 +149,15 @@ class WPHeadlessModule {
             return false;
         }
         return ($this->get_instance()->get_request_type() == "archive");
-    } 
+    }
+    function is_embed() {
+
+        if ( get_array_value($_GET,"_embed",false) === false) {
+            return false;
+        }
+
+        return true;
+
+    }
 
 }

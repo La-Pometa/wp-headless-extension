@@ -85,7 +85,14 @@ class WPHeadlessContent extends WPHeadlessModule
 	}
 	function _post_dispatch($object, $server, $request) {
 		if ( $this->is_post_archive()) {
-			$responseData = $object->get_data();
+			if ( $this->is_embed() ) {
+				global $wp_rest_server;
+				$responseData= $wp_rest_server->response_to_data($object,true );
+			}
+			else {
+				$responseData = $object->get_data();
+			}
+
 		 	$responseData = apply_filters("wpheadless/archive",array("data"=>$responseData),$object,$request);
 		 	$object->set_data($responseData);
 		}

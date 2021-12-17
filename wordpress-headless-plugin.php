@@ -222,11 +222,10 @@ function wpheadless_archive_show_type_info($type) {
    // echo "<br> SET REQUEST TYPE['".$type."']";
 }
 
-add_action("wpheadless/request/type/action","wpheadless_archive_set_request_fields");
+//add_action("wpheadless/request/type/action","wpheadless_archive_set_request_fields");
 function wpheadless_archive_set_request_fields($type) {
         if ( $type == "archive" ) {
-            $_GET["_fields"]=array("slug","content","excerpt","title","categories","featured_media","featured_source", "_embedded");
-            $_GET["embedded"]=1;
+           $_GET["_fields"]=array("slug","content","excerpt","title","categories","featured_media","featured_source");
         }
 }
 
