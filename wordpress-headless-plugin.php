@@ -3,7 +3,7 @@
 Plugin Name: Pometa Wordpress Headless API Extension
 Plugin URI: https://lapometa.com
 Description: A simple wordpress plugin to make your wordpress more headless capable
-Version: 0.0.4
+Version: 0.0.5
 Author: La Pometa
 Author URI: https://github.com/La-Pometa
 GitHub Plugin URI: La-Pometa/pometa-wp-headless-api-extension
