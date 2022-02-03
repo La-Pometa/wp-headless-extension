@@ -10,7 +10,7 @@ function wpheadless_intuitivecpo_load_module($modules) {
 class WPHeadlessIntuitiveCPO extends WPHeadlessModule {
 
 
-    function _construct() {
+    function __construct() {
         add_action("init",array($this,"init"));
     }
 
