@@ -150,6 +150,17 @@ class WPHeadlessModule {
         }
         return ($this->get_instance()->get_request_type() == "archive");
     }
+    function is_debug($param="") {
+        if ( !$param) {
+            $param = "debug";
+        }
+
+        //echo "<br> PARAMS:<pre>".print_r($this->get_instance(),true)."</pre>";
+        if ( get_array_value($this->get_instance()->get_params(),$param,false) === false) {
+            return false;
+        }
+        return true;
+    }
     function is_embed() {
 
         if ( get_array_value($_GET,"_embed",false) === false) {
@@ -158,6 +169,22 @@ class WPHeadlessModule {
 
         return true;
 
+    }
+    function console_enable() {
+        if ( !$this->get_instance() ) {
+            $this->console("modules","Error CONSOLE_ENABLE INSTANCE WP_Headless = NULL");
+            return false;
+        }
+        return $this->get_instance()->console_enable();
+
+    }
+    function console_disable() {
+        if ( !$this->get_instance() ) {
+            $this->console("modules","Error CONSOLE_DISABLE INSTANCE WP_Headless = NULL");
+            return false;
+        }
+        return $this->get_instance()->console_disable();
+        
     }
 
 }

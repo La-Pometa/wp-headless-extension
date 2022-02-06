@@ -6,12 +6,28 @@ class WPHeadlessContent extends WPHeadlessModule
 
 
 	var $excerpt = "";
+	var $site_url = false;
 
 
 	function _filter_content($content)
 	{	
 		$content = do_shortcode($content);
 		return $content;
+	}
+
+
+	function content_render_components($object, $field_name, WP_REST_Request $request)
+	{
+
+		if ( $this->is_post_archive()) {
+			if (!apply_filters("wpheadless/rest/content/list/components/include", false, array("object" => $object, "request" => $request))) {
+				return false;
+			}
+		}
+
+		$object = apply_filters("wpheadless/rest/content/components", array(), $object);
+
+		return $object;
 	}
 
 	function content_render_post_meta($object, $field_name, WP_REST_Request $request)
@@ -22,8 +38,12 @@ class WPHeadlessContent extends WPHeadlessModule
 				return false;
 			}
 		}
-		
 		$post_type = get_array_value($object["type"]);
+
+		if ( !apply_filters("wpheadless/rest/content/single/post_meta/include", true , array("post_type"=>$post_type,"object" => $object, "request" => $request)) ) {
+			return false;
+		}
+		
 
 		/*- Passar les variables de postmeta arreglades -*/
 
@@ -143,6 +163,11 @@ class WPHeadlessContent extends WPHeadlessModule
 		if (is_array($posttypes)) {
 			foreach ($posttypes as $post => $cpt) {
 
+
+
+				add_filter($cpt."_link", [ $this , "_headless_get_permalink"],100,2);
+
+
 				$this->console("Loading CPT [" . $cpt . "]");
 
 
@@ -196,17 +221,29 @@ class WPHeadlessContent extends WPHeadlessModule
 					)
 				);
 
-				$this->console("Loading CPT [" . $cpt . "][meta_info]");
+
+				if ( apply_filters("wpheadless/rest/content/single/post_meta/include", true, array("post_type"=>$cpt)) ) {
+					$this->console("Loading CPT [" . $cpt . "][meta_info]");
+					register_rest_field(
+						$cpt,
+						'meta_info',
+						array(
+							'get_callback'    => array($this, "content_render_post_meta"),
+							'update_callback' => null,
+							'schema'          => null,
+						)
+					);
+				}
+				$this->console("Loading CPT [" . $cpt . "][components]");
 				register_rest_field(
 					$cpt,
-					'meta_info',
+					'components',
 					array(
-						'get_callback'    => array($this, "content_render_post_meta"),
+						'get_callback'    => array($this, "content_render_components"),
 						'update_callback' => null,
 						'schema'          => null,
 					)
 				);
-
 
 
 				do_action("wpheadless/content/init", $cpt);
@@ -214,6 +251,20 @@ class WPHeadlessContent extends WPHeadlessModule
 		}
 
 		add_filter("wpheadless/rest/content/taxonomy/hide", array($this, "_prevent_terms"));
+	}
+	function _headless_get_permalink($url, $post_id) {
+
+		if ( $this->site_url == false ) {
+			$this->site_url = site_url();
+		}
+
+		$url = str_replace($this->site_url,"",$url);
+
+		$url = apply_filters("wpheadless/content/link",$url,$post_id);
+
+		return $url;
+
+
 	}
 
     function content_render_excerpt($object, $field_name, $request)

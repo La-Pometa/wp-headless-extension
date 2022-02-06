@@ -17,7 +17,7 @@
 
 define("WPHI_INTEGRATION_POLYLANG_ID","wphi-polylang");
 
-add_filter("wpheadless/integrations/info","wpheadless_rest_modules_vendor_polylang_admin_info");
+//add_filter("wpheadless/integrations/info","wpheadless_rest_modules_vendor_polylang_admin_info");
 function wpheadless_rest_modules_vendor_polylang_admin_info($modules) {
 
     $info = get_plugin_data(__FILE__);
@@ -36,7 +36,7 @@ function wpheadless_rest_modules_vendor_polylang_admin_info($modules) {
 }
 
 
-add_filter("wpheadless/modules/load", "wpheadless_polylang_load_module");
+//add_filter("wpheadless/modules/load", "wpheadless_polylang_load_module");
 function wpheadless_polylang_load_module($modules)
 {
     $modules["polylang"] = "WPHeadlessPolyLang";
@@ -53,12 +53,34 @@ class WPHeadlessPolyLang extends WPHeadlessModule
 
     public function init()
     {
-       
+               
         // Modificar el idioma de la REST API
         add_action('rest_api_init',[$this, 'rest_init'], 0);
         
         // Abans d'afegir els filtres, comprovar que el plugin estigui actiu; solament després de "init"
         add_action("init",[$this,"_init_filters"]);
+
+
+        add_filter("wpheadless/content/link",[$this,"_get_permalink"],100,2);
+    }
+
+    function _get_permalink($url,$post_id) {
+
+        if ( function_exists("pll_languages_list")) {
+			$languages = pll_languages_list(array("hide_empty"=>false,"fields"=>"slug"));
+		   // echo "<br> Languages <pre>".print_r($languages,true)."</pre>";
+			$langs = array();
+			foreach($languages as $lang_pos => $lang_slug) {
+					$langs[] ="/".$lang_slug."/";
+			}
+			$dx = 1; //sStrlen - last '/'
+			foreach($langs as $lang_text) {
+				if ( substr($url,0,strlen($lang_text)) == $lang_text) {
+					$url = substr($url,strlen($lang_text)-$dx,(strlen($url)-strlen($lang_text))+$dx);
+				}
+			}
+	    }
+        return $url;
     }
 
     function _init_filters() {
@@ -69,7 +91,7 @@ class WPHeadlessPolyLang extends WPHeadlessModule
             return;
         }
 
-        add_action("wpheadless/content/init", [$this, "register_api_field"] );
+        add_action("wpheadless/content/init", [$this, "register_api_field"] , 2000);
     }
 
     public function rest_init()
@@ -125,7 +147,7 @@ class WPHeadlessPolyLang extends WPHeadlessModule
         $this->console("Loading CPT [" . $post_type . "][get_translations]");
         register_rest_field(
             $post_type,
-            "translations",
+            "translation",
             array(
                 "get_callback" => [$this, "get_translations"],
                 "schema" => null,
@@ -170,7 +192,7 @@ class WPHeadlessPolyLang extends WPHeadlessModule
             $post = get_post($translation);
             $item = array(
                 'locale' => pll_get_post_language($translation),
-                'id' => $translation,
+                // 'id' => $translation,
                 'slug' => $post->post_name,
                 'title' => get_the_title($translation),
                 'url' => get_permalink($translation),

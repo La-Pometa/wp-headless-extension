@@ -44,10 +44,12 @@ if (!class_exists('WP_Headless')) {
         private WPHeadlessModules $Modules;
 
         private string $request_type = "";
-        private bool $debug = false;
+        private bool $debug =  true;
         private array $debug_buffer = array();
         private float $debug_start=0;
         private $request= false;
+        private $params = array();
+        private $is_api_request = false;
 
         /**
          * Construct the plugin object
@@ -55,12 +57,14 @@ if (!class_exists('WP_Headless')) {
         public function __construct()
         {
 
-
+            $this->params = $_GET;
+            $this->is_api_request="undefined";
             // Debug info
             $this->debug_start = $this->microtime(true);
-            if (get_array_value($_GET, "debug", false) !== false) {
+            if (get_array_value($this->params, "debug", false) !== false) {
                 $this->debug=true;
             }
+
 
             // Registrar crides a post_types: per a determinar el tipus de request
             add_filter('rest_post_dispatch',array($this,'_post_dispatch'),2000,3);
@@ -88,8 +92,8 @@ if (!class_exists('WP_Headless')) {
             $this->console("boot","Carregar Mòduls->final");
 
 
+            $this->is_rest();
             $this->_get_request_info();
-
 
             // Carregar apartat administrador, si estic a l'administrador
             $this->IntegrationsAdmin=false;
@@ -147,7 +151,27 @@ if (!class_exists('WP_Headless')) {
         function set_request_type($type) : void {
             $this->request_type=$type;
         }
+        function console_enable() {
+            $this->debug = true;
+            return $this->debug;
+        }
+        function console_disable() {
+            $this->debug = false;
+            return $this->debug;
+        }
+        function get_params() {
+            return $this->params;
+        }
+        function is_rest() {
+            if ( $this->is_api_request == "undefined" ) {
+                $this->is_api_request=false;
+                if ( defined("REST_REQUEST") || !is_admin() ) {
+                    $this->is_api_request=true;
+                }
 
+            }
+            return $this->is_api_request;
+        }
         // Getter request_type
         function get_request_type() : string {
             return $this->request_type;
