@@ -3,7 +3,7 @@
 Plugin Name: Pometa Wordpress Headless API Extension
 Plugin URI: https://lapometa.com
 Description: A simple wordpress plugin to make your wordpress more headless capable
-Version: 0.0.5
+Version: 0.0.6
 Author: La Pometa
 Author URI: https://github.com/La-Pometa
 GitHub Plugin URI: La-Pometa/pometa-wp-headless-api-extension
@@ -44,13 +44,13 @@ if (!class_exists('WP_Headless')) {
         private WPHeadlessModules $Modules;
 
         private string $request_type = "";
-        private bool $debug =  true;
+        private bool $debug = false;
         private array $debug_buffer = array();
         private float $debug_start=0;
         private $request= false;
         private $params = array();
         private $is_api_request = false;
-
+        private $clean_endpoints = false;
         /**
          * Construct the plugin object
          */
@@ -64,7 +64,9 @@ if (!class_exists('WP_Headless')) {
             if (get_array_value($this->params, "debug", false) !== false) {
                 $this->debug=true;
             }
-
+            if (get_array_value($this->params, "clean", false) !== false) {
+                $this->clean_endpoints=true;
+            }
 
             // Registrar crides a post_types: per a determinar el tipus de request
             add_filter('rest_post_dispatch',array($this,'_post_dispatch'),2000,3);
@@ -94,6 +96,13 @@ if (!class_exists('WP_Headless')) {
 
             $this->is_rest();
             $this->_get_request_info();
+            
+            add_filter('dra_allow_rest_api', '__return_true');
+
+            if ( $this->clean_endpoints ) {
+
+                
+            }
 
             // Carregar apartat administrador, si estic a l'administrador
             $this->IntegrationsAdmin=false;
@@ -145,6 +154,10 @@ if (!class_exists('WP_Headless')) {
             require_once(sprintf("%s/".$file, dirname(__FILE__)));
             $this->console("root"," * require_file($file)->final");
 
+        }
+  
+        function remove_default_endpoints( $endpoints ) {
+            return array( );
         }
 
         // Setter request_type

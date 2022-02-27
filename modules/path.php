@@ -70,6 +70,8 @@ class WPHeadlessPath extends WPHeadlessModule {
 			$multi_language=false;
 			$content="";
 			$ret=array();
+			$object_type = "post_type";
+			$object_object = "page";
 
 			
 			$embed = false;
@@ -113,13 +115,15 @@ class WPHeadlessPath extends WPHeadlessModule {
 			}
 
 			else {
+
 				$args = array( 'post_type' => 'any','name'=>$slug, 'fields'=> 'ids','from'=>'path');
 				$args['lang'] = ( $multi_language ? $args["lang"] : "all" );
-				
+				$args =  apply_filters("wpheadless/path/slug/query/args",$args,$this);
 
+				/*-
 				$content_id = false;
 				$query = new WP_Query( $args );
-				//echo "<br> QUERY:<pre>".print_r($query,true)."</pre>";
+
 				if ( $query ) {
 					$found = get_object_value($query,"posts",array());
 					$nfound = count($found);
@@ -178,7 +182,88 @@ class WPHeadlessPath extends WPHeadlessModule {
 				}
 			}
 
+			-*/
 
+				$content_id = false;
+				$object_id =  apply_filters("wpheadless/path/slug/content/id",false,$args,$this);
+				//echo "<br> OBJECT: <pre>".print_r($object_id,true)."</pre>";
+				if ( is_array($object_id)) {
+					$object_type = get_array_value($object_id,"obj_type",$object_type);
+					$object_object = get_array_value($object_id,"obj_object",$object_object);
+					$object_id = get_array_value($object_id,"obj_id",false);
+				}
+				if ( !$object_id ) {
+
+					$query = new WP_Query( $args );
+
+					if ( $query ) {
+						$found = get_object_value($query,"posts",array());
+						$nfound = count($found);
+						if ( $found ) {
+							foreach($found as $content_id) {
+
+								if ( $multi_language) {
+									if ( $translate ) {
+										$translations = pll_get_post_translations($content_id);
+										$content_id = get_array_value($translations,$translate,"");
+									}
+								}
+
+								$response["path"]["ids"][]=$content_id;
+								
+							}
+						}
+						else {
+							if ( $content_id ) {
+								$response["path"]["ids"][]="ERROR!(".$content_id.")";
+							}
+						}
+					}
+				}
+
+				if ( $object_id ) {
+
+					if ( $object_type == "post_type") {
+
+						$cpt = get_post_type($object_id);
+
+						if ( $cpt ) {
+							$request_str =  '/wp/v2/'.$cpt.'/'.$object_id;
+
+							switch ($cpt) {
+								case "post":$request_str =  '/wp/v2/posts/'.$object_id;break;
+								case "page":$request_str =  '/wp/v2/pages/'.$object_id;break;
+
+							}
+
+							$this->console("GET Request: $request_str [".$object_id."]");
+
+							if ( $request_str ) {
+								$request_resp = new WP_REST_Request( 'GET' , $request_str );
+								$request_resp = rest_do_request( $request_resp );
+							
+								$ret=get_object_value($request_resp,"data",false);
+
+								// Embed ?
+								if ( $embed ) {
+									global $wp_rest_server;
+									$ret= $wp_rest_server->response_to_data($request_resp, $embed);
+								}
+
+							}
+						}
+					}
+					else if ( $object_type == "taxonomy") {
+						$ret["taxonomy"]=$object_id;
+					}
+				}
+				else {
+					$ret["error"]=404;
+				}
+			}
+
+			$ret = apply_filters("wpheadless/path/response",$ret);
+			
 			// $response["path"]["count"]=count(get_array_value($response["path"],"ids",array()));
 
 			//return $response;

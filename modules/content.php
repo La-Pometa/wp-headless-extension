@@ -234,10 +234,10 @@ class WPHeadlessContent extends WPHeadlessModule
 						)
 					);
 				}
-				$this->console("Loading CPT [" . $cpt . "][components]");
+				$this->console("Loading CPT [" . $cpt . "][slices]");
 				register_rest_field(
 					$cpt,
-					'components',
+					'slices',
 					array(
 						'get_callback'    => array($this, "content_render_components"),
 						'update_callback' => null,

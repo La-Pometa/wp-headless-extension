@@ -50,6 +50,13 @@ class WPHeadlessSitemap extends WPHeadlessModule {
         }
         function get_settings_response(WP_REST_Request $request ) {
             $_req=array("sitemap"=>array());
+
+            $res = apply_filters("wpheadless/sitemap/response",false);
+            if ( $res !== false ) {
+                return $res;
+            }
+
+
             $site_url = site_url();
 
             $args = array(

@@ -36,7 +36,7 @@ function wpheadless_rest_modules_vendor_polylang_admin_info($modules) {
 }
 
 
-//add_filter("wpheadless/modules/load", "wpheadless_polylang_load_module");
+add_filter("wpheadless/modules/load", "wpheadless_polylang_load_module");
 function wpheadless_polylang_load_module($modules)
 {
     $modules["polylang"] = "WPHeadlessPolyLang";
@@ -123,6 +123,7 @@ class WPHeadlessPolyLang extends WPHeadlessModule
         }
         foreach ($taxonomies as $taxonomy) {
             if (pll_is_translated_taxonomy($taxonomy)) {
+                $this->console("Bind Taxonomy: $taxonomy");
                 $this->register_api_taxonomy($taxonomy);
             }
         }

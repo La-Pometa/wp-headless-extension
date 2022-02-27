@@ -274,7 +274,7 @@ class WPHeadlessSettings extends WPHeadlessModule
                 $title = get_array_value($data,"title",false);
                 $sizes = get_array_value($data,"sizes",array());
                 $element = array();
-                $element["pos"]=$pos;
+                //$element["pos"]=$pos;
                 $element["alt"]=$alt;
                 $element["title"]=$title;
                 $element["sizes"]=$sizes;
