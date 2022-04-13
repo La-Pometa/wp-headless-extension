@@ -50,7 +50,9 @@ class WPHeadlessJSComposer extends WPHeadlessModule
     //Sobreescriure funció init amb els filtres per a la integració
     function init()
     {
-
+        if ( !function_exists("is_plugin_active")) {
+            return;
+        }
         if (!is_plugin_active('js_composer/js_composer.php')) {
             return;
         }
