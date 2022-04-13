@@ -90,6 +90,8 @@ class WPHeadlessModules
 class WPHeadlessModule {
     private $module_name = false;
     private $instance = false;
+    private $is_integration = false;
+
     function __construct() {
     
     }
@@ -97,14 +99,23 @@ class WPHeadlessModule {
     function init() {
         $this->console("Function 'init' must be override on final class");
     }
-
+    function setAsIntegration() {
+        $this->is_integration = true;
+    }
+    function setAsModule() {
+        $this->is_integration = false;
+    }
     public function console($string)
     {
         if ( !$this->get_instance() ) {
             //$this->console("Error console() => INSTANCE WP_Headless = NULL");
             return false;
         }
-        return $this->get_instance()->console("module(".$this->module_name.")",$string);
+        $type = "module";
+        if ( $this->is_integration ) {
+            $type = "integration";
+        }
+        return $this->get_instance()->console($type."(".$this->module_name.")",$string);
 
     }
 

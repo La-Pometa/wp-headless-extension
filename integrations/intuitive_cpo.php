@@ -15,6 +15,8 @@ class WPHeadlessIntuitiveCPO extends WPHeadlessModule {
     }
 
     function init() {
+        $this->setAsIntegration();
+
         add_action("wpheadless/content/init",array($this,"_content_init"));
     }
 

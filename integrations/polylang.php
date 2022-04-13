@@ -53,6 +53,8 @@ class WPHeadlessPolyLang extends WPHeadlessModule
 
     public function init()
     {
+
+        $this->setAsIntegration();
                
         // Modificar el idioma de la REST API
         add_action('rest_api_init',[$this, 'rest_init'], 0);

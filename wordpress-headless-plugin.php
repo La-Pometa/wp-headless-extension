@@ -97,7 +97,6 @@ if (!class_exists('WP_Headless')) {
             $this->is_rest();
             $this->_get_request_info();
             
-            add_filter('dra_allow_rest_api', '__return_true');
 
             if ( $this->clean_endpoints ) {
 
@@ -117,7 +116,7 @@ if (!class_exists('WP_Headless')) {
                 $this->console("boot","Registrar Administrador");
                 // Estic a l'administrador? Carregar ThemeSettings 
                 $this->Integrations->loadAdmin();
-                $this->Integrations->loadAdminFilters();
+                $this->IntegrationsAdmin = true;
 
             }
 
@@ -259,7 +258,7 @@ function wpheadless_archive_show_type_info($type) {
    // echo "<br> SET REQUEST TYPE['".$type."']";
 }
 
-//add_action("wpheadless/request/type/action","wpheadless_archive_set_request_fields");
+add_action("wpheadless/request/type/action","wpheadless_archive_set_request_fields");
 function wpheadless_archive_set_request_fields($type) {
         if ( $type == "archive" ) {
            $_GET["_fields"]=array("slug","content","excerpt","title","categories","featured_media","featured_source");

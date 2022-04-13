@@ -1,0 +1,25 @@
+{
+	"$schema": "https://json.schemastore.org/block.json",
+	"apiVersion": 2,
+	"title": "WPHeadless : Component",
+	"name": "whpeadless/wphcomponent",
+	"category": "layout",
+	"icon": "universal-access-alt",
+	"textdomain": "wpheadlessltd",
+	"attributes": {
+		"component": {
+			"type": "number",
+			"source": "html",
+			"selector": ".message"
+		}
+	},
+	"example": {
+		"attributes": {
+			"component": "100"
+		}
+	},
+	"editorScript": "file:./block.js",
+	"script": "file:./script.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style.css"
+}

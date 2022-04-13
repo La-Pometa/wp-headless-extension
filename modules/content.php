@@ -149,10 +149,16 @@ class WPHeadlessContent extends WPHeadlessModule
 	{
 
 		// remove_filter('the_excerpt', 'wpautop');
-		add_filter('rest_post_dispatch',array($this,'_post_dispatch'),200,3);
+		if ( is_admin() ) {
+			add_filter('rest_post_dispatch',array($this,'_post_dispatch'),200,3);
+		}
 		add_filter("the_content", array($this, "_filter_content"),20);
 		add_filter("wpheadless/archive",array($this,"_headless_archive"),20,3);
+		add_filter("plugins_loaded", array($this, "load"),2000);
 
+	}
+
+	function load() {
 
 		global $wp_post_types;
 		$posttypes = array_keys($wp_post_types);
@@ -177,27 +183,29 @@ class WPHeadlessContent extends WPHeadlessModule
 					continue;
 				}
 
-				register_rest_field(
-					$cpt,
-					'content',
-					array(
-						'get_callback'    => array($this, "content_render"),
-						'update_callback' => null,
-						'schema'          => null,
-					)
-				);
-		
-				$this->console("Loading CPT [" . $cpt . "][content_render_excerpt]");
-		
-				register_rest_field(
-					$cpt,
-					'excerpt',
-					array(
-						'get_callback'    => array($this, "content_render_excerpt"),
-						'update_callback' => null,
-						'schema'          => null,
-					)
-				);
+				if ( !is_admin() ) {
+					register_rest_field(
+						$cpt,
+						'content',
+						array(
+							'get_callback'    => array($this, "content_render"),
+							'update_callback' => null,
+							'schema'          => null,
+						)
+					);
+			
+					$this->console("Loading CPT [" . $cpt . "][content_render_excerpt]");
+
+					register_rest_field(
+						$cpt,
+						'excerpt',
+						array(
+							'get_callback'    => array($this, "content_render_excerpt"),
+							'update_callback' => null,
+							'schema'          => null,
+						)
+					);
+				}
 
 				$this->console("Loading CPT [" . $cpt . "][autor_info]");
 				register_rest_field(
@@ -294,7 +302,7 @@ class WPHeadlessContent extends WPHeadlessModule
 
 		$this->excerpt = $post_content;
         if ( $this->is_post_archive()) {
-			$post_content = "~";
+			$post_content = "#";
         }
 		$post_content = apply_filters("wpheadless/content",$post_content,$object);
 		$post_content = do_shortcode($post_content);
