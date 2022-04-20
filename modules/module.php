@@ -34,6 +34,7 @@ class WPHeadlessModules
     function get_instance() {
         return $this->instance;
     }
+
     function register_modules($headless)
     {
         $modules = array(
@@ -49,7 +50,7 @@ class WPHeadlessModules
             if (!class_exists($module_class)) {
                 $this->console("modules","REGISTER MODULE ERROR (CLASS NOT FOUND) [" . $module . "] {" . $module_class . "}");
             } else {
-                $this->console("modules","REGISTER MODULE[" . $module . "] {" . $module_class . "}");
+                $this->console("modules","REGISTER MODULE[".__FILE__."][" . $module . "] {" . $module_class . "}");
                 $this->modules[$module] = new $module_class();
                 $this->modules[$module]->setInstance($headless);
                 $this->modules[$module]->integration_id = $module;
@@ -186,5 +187,14 @@ class WPHeadlessModule {
         return $this->get_instance()->console_disable();
         
     }
+
+    
+    function get_settings_allow_duplicate_slugs() {
+        return $this->get_settings("allow_duplicate_slugs");
+    }
+    function get_settings($params = false) {
+        return $this->instance->settings($params);
+    }
+
 
 }

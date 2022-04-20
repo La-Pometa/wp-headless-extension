@@ -293,9 +293,9 @@ class WPHeadlessContent extends WPHeadlessModule
         $post_content = get_array_value(get_array_value($object,"content",array()),"raw","");
 
 		$this->excerpt = $post_content;
-        if ( $this->is_post_archive()) {
-			$post_content = "~";
-        }
+        // if ( $this->is_post_archive()) {
+		// 	$post_content = "~";
+        // }
 		$post_content = apply_filters("wpheadless/content",$post_content,$object);
 		$post_content = do_shortcode($post_content);
 		return array("rendered"=>$post_content);

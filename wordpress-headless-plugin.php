@@ -51,6 +51,7 @@ if (!class_exists('WP_Headless')) {
         private $params = array();
         private $is_api_request = false;
         private $clean_endpoints = false;
+        private $allow_duplicate_slugs = true;
         /**
          * Construct the plugin object
          */
@@ -97,6 +98,9 @@ if (!class_exists('WP_Headless')) {
             $this->is_rest();
             $this->_get_request_info();
             
+
+            add_action("plugins_loaded",[$this,"_get_request_start"]);
+
             add_filter('dra_allow_rest_api', '__return_true');
 
             if ( $this->clean_endpoints ) {
@@ -193,7 +197,9 @@ if (!class_exists('WP_Headless')) {
         function microtime() {
             return round(microtime(true)*1000,2);
         }
-
+        function _get_request_start() {
+            do_action("wpheadless/request/start");
+        }
         function _get_request_info() {
             $this->console("root","wpheadless/request/type/action->inici");
 
@@ -206,11 +212,16 @@ if (!class_exists('WP_Headless')) {
 
             $this->console("root","wpheadless/request/call ".$call);
 
+                       
             $this->call = explode("/",$call);
             $type = "single";
             if ( count($this->call) == 1 ) {
                 $type = "archive";
             }
+
+
+
+
             $this->set_request_type(apply_filters("wpheadless/request/type/filter",$type,$call));
             do_action("wpheadless/request/type/action",$this->get_request_type());
             $this->console("root","wpheadless/request/type/action '".$this->get_request_type()."'");
@@ -219,8 +230,27 @@ if (!class_exists('WP_Headless')) {
     }
 
 
+
+        function settings_allow_duplicate_slugs() {
+            return $this->settings("allow_duplicate_slugs");
+        }
+        function settings($params=false) {
+
+            $res = false;
+            if ( $params ) {
+                if ( $params == "allow_duplicate_slugs") {
+                    return $this->allow_duplicate_slugs;
+                }
+
+                return false;
+
+            }
+            return NULL;
+
+
+        }
+
         // Mostrar informació de Debug
-        // TODO: Integrair dins de la WP_Rest_Respnse
         function console($module_name,$string) {
             if ($this->debug) {
                 $time = $this->microtime(true) - $this->debug_start;

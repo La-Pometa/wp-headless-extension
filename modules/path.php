@@ -19,7 +19,7 @@ class WPHeadlessPath extends WPHeadlessModule {
 				$this->console("Register ::init_routes");
                 add_action("wpheadless/routes/new",array($this,"init_routes"));
 				add_filter( 'pre_get_posts', [$this,"pre_get_posts"] ,10000 );
-
+				add_filter( 'posts_where', [$this,'_posts_where'], 10000, 2 );
 
 				add_filter("wpheadless/request/type/filter",array($this,"_request_type"),20,2);
         }
@@ -33,16 +33,48 @@ class WPHeadlessPath extends WPHeadlessModule {
 
 			return $type;
 		}
+
+		function _posts_where( $where, $wp_query ) {
+
+			if ( parent::get_settings_allow_duplicate_slugs() ) {
+				global $wpdb;
+				$from  = $wp_query->get( 'from' );
+
+				if ( $from == "path" && $wp_query->get( 'likename' ) ) {
+
+					$names =  $wp_query->get( 'likename' );
+
+					if ( !is_array($names)) { $names=array($names); }
+					$where .="AND ( ";
+					$n=0;
+					foreach($names as $name_pos => $name) {
+						$where .=($n?  ' OR ':'').  $wpdb->posts . '.post_name = \'' . esc_sql( $wpdb->esc_like( $name) )  . '\'';
+						$n++;
+					}
+					$where.=" )";
+				}
+			}
+
+			return $where;
+		}
+
 		function pre_get_posts($query) {
 
+			if ( is_admin()) {
+				return $query;
+			}
+
+
+			$lang = get_array_value($_GET,'lang',"es");
 			$vars = get_object_value($query,"query",array());
 
 			if ( get_array_value($vars,"from",false) != "path") {
 				return $query;
 			}
 
-			$query->query_vars["lang"]="all";
+			$query->query_vars["lang"]=$lang;
 
+			
 			return $query;
 		}
 
@@ -67,13 +99,14 @@ class WPHeadlessPath extends WPHeadlessModule {
 			$lang = get_array_value($_GET,'lang',"es");
 
 			$translate = get_array_value($_GET,'translate',"");
-			$multi_language=false;
+			$multi_language=apply_filters("wpheadless/rest/path/multilanguage",false);
 			$content="";
 			$ret=array();
 			$object_type = "post_type";
 			$object_object = "page";
 
-			
+			$this->console("GET Request (Multilanguage): ".($multi_language ? "TRUE" :"FALSE"));
+
 			$embed = false;
 			if ( get_array_value($_GET,"_embed",false) !== false ) {
 				 $embed = true;
@@ -82,7 +115,7 @@ class WPHeadlessPath extends WPHeadlessModule {
 			if ( !$slug ) {
 
 				$post_id = apply_filters("wpheadless/rest/path/frontpage",false);
-				// $response["path"]["frontpage"]=$post_id;
+				$response["path"]["frontpage"]=$post_id;
 
 				if ( !$post_id ) {
 					$post_id = get_option('page_on_front');
@@ -116,8 +149,20 @@ class WPHeadlessPath extends WPHeadlessModule {
 
 			else {
 
-				$args = array( 'post_type' => 'any','name'=>$slug, 'fields'=> 'ids','from'=>'path');
-				$args['lang'] = ( $multi_language ? $args["lang"] : "all" );
+				$args = array( 'post_type' => 'any','name'=>$slug, 'fields'=> 'ids','from'=>'path','post_status'=>'publish','lang'=>$lang);
+				//$args['lang'] = ( $multi_language ? $args["lang"] : "" );
+
+				if ( parent::get_settings_allow_duplicate_slugs() ) {
+					unset($args["name"]);
+					$args["likename"]=apply_filters("wpheadless/path/query/likename",array(),$slug);
+					$args["lang"]=$lang;
+				}
+
+
+				if ( !get_array_value($args,"lang",false)) {
+				//	unset($args["lang"]);
+				}
+
 				$args =  apply_filters("wpheadless/path/slug/query/args",$args,$this);
 
 				/*-
@@ -186,19 +231,24 @@ class WPHeadlessPath extends WPHeadlessModule {
 
 				$content_id = false;
 				$object_id =  apply_filters("wpheadless/path/slug/content/id",false,$args,$this);
-				//echo "<br> OBJECT: <pre>".print_r($object_id,true)."</pre>";
+
 				if ( is_array($object_id)) {
 					$object_type = get_array_value($object_id,"obj_type",$object_type);
 					$object_object = get_array_value($object_id,"obj_object",$object_object);
 					$object_id = get_array_value($object_id,"obj_id",false);
 				}
-				if ( !$object_id ) {
 
+
+				if ( !$object_id ) {
+					//echo "<br> QUERY ARGS: <pre>".print_r($args,true)."</pre>";
 					$query = new WP_Query( $args );
+				//	echo "<br> QUERY RES: <pre>".print_r($query,true)."</pre>";
 
 					if ( $query ) {
 						$found = get_object_value($query,"posts",array());
 						$nfound = count($found);
+						$this->console("GET Request (Found:".$nfound.")  [".print_r($found,true)."]");
+
 						if ( $found ) {
 							foreach($found as $content_id) {
 
@@ -210,6 +260,8 @@ class WPHeadlessPath extends WPHeadlessModule {
 								}
 
 								$response["path"]["ids"][]=$content_id;
+								$object_id = $content_id;
+								$object_type = "post_type";
 								
 							}
 						}
@@ -218,7 +270,10 @@ class WPHeadlessPath extends WPHeadlessModule {
 								$response["path"]["ids"][]="ERROR!(".$content_id.")";
 							}
 						}
+
 					}
+
+
 				}
 
 				if ( $object_id ) {
