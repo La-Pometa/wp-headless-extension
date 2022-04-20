@@ -5,7 +5,7 @@
 defined( 'ABSPATH' ) || exit;
 
 //include_once 'gutenberg-blocks/wphcomponent/index.php';
-include_once 'gutenberg-blocks/01-basic/index.php';
+//include_once 'gutenberg-blocks/01-basic/index.php';
 
 add_filter("wpheadless/modules/load","wpheadless_gutenberg_load_module");
 function wpheadless_gutenberg_load_module($modules) {
@@ -67,7 +67,8 @@ class WPHeadlessGutenberg extends WPHeadlessModule {
 		// add_filter("render_block_data", [ $this , "_render_block_data" ] , 200 , 3);
 		// add_filter("pre_render_block", [ $this , "_pre_render_block" ] , 200 , 3);
 		add_filter("render_block" , [ $this, "_render_block" ] , 200 , 3);
-
+		//add_filter("wpheadless/content/block", [ $this, "_content_block"], 200);
+		
 
     }
 	function _render_block($block_output, $parsed_block, $render = false ) {
@@ -178,12 +179,12 @@ class WPHeadlessGutenberg extends WPHeadlessModule {
 			if ( in_array($object_type,$this->cpts)) {
 				$blocks = parse_blocks($content);
 
-				$blocks = apply_filters("wpheadless/content/blocks",$blocks);
 				
 				//echo "<br> RES: <pre>".print_r($res,true)."</pre>";
 				// Convertir a Slices 
 				$content = "content-filtered-by-gutenberd-integration";
 				foreach($blocks as $block_pos => $block_data) {
+					$block_data = apply_filters("wpheadless/content/block",$block_data);
 					$this->slices[]=$block_data;
 				}
 
