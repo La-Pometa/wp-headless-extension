@@ -64,8 +64,13 @@ class WPHeadlessPath extends WPHeadlessModule {
 				return $query;
 			}
 
+			if ( get_array_value($_GET,'lang',false) == false ) {
+				$lang = get_array_value($_GET,'translate',"es");
+			}
+			else {
+				$lang = get_array_value($_GET,'lang',"es");
+			}
 
-			$lang = get_array_value($_GET,'lang',"es");
 			$vars = get_object_value($query,"query",array());
 
 			if ( get_array_value($vars,"from",false) != "path") {
@@ -180,6 +185,7 @@ class WPHeadlessPath extends WPHeadlessModule {
 
 				if ( !$object_id ) {
 					//echo "<br> QUERY ARGS: <pre>".print_r($args,true)."</pre>";
+					$this->console("GET Request [".print_r($args,true)."]");
 					$query = new WP_Query( $args );
 				//	echo "<br> QUERY RES: <pre>".print_r($query,true)."</pre>";
 

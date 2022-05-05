@@ -212,6 +212,9 @@ class WPHeadlessPolyLang extends WPHeadlessModule
         $params = $request->get_params();
         $max = max((int)$request->get_param('custom_per_page'), 200);
         $lang = get_array_value($params, "lang", false);
+        if ( $lang === false ) {
+            $lang = get_array_value($params, "translate", false);
+        }
         if (!$lang) {
             if (function_exists("pll_default_language")) {
                 $lang = pll_default_language();
