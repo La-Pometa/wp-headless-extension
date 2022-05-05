@@ -104,6 +104,24 @@ class WPHeadlessContent extends WPHeadlessModule
 		return $ret;
 	}
 	function _post_dispatch($object, $server, $request) {
+		$route = $request->get_route();
+		//echo "<br> ROUTE: : $route";die();
+		$route_prevent = array(
+			"/wp/v2/blocks",
+			"/wp/v2/pages",
+			"/wp/v2/media",
+			"/wp/v2/themes",
+			"/wp/v2/templates",
+			"/wp/v2/taxonomies",
+			"/wp/v2/categories",
+			"/wp/v2/tags",
+		);
+		$this->console("_post_dispatch: route[".$route."]");
+		if ( in_array($route,$route_prevent) ) {
+			//echo "<br> OJBECT: <pre>".print_r($object,true)."</pre>";
+			return $object;
+		}
+
 		if ( $this->is_post_archive()) {
 			if ( $this->is_embed() ) {
 				global $wp_rest_server;
@@ -115,6 +133,7 @@ class WPHeadlessContent extends WPHeadlessModule
 
 		 	$responseData = apply_filters("wpheadless/archive",array("data"=>$responseData),$object,$request);
 		 	$object->set_data($responseData);
+			//  echo "<br> SERVER :<pre>".print_r($object,true)."</pre>";
 		}
 		return $object;
 	}
@@ -149,12 +168,12 @@ class WPHeadlessContent extends WPHeadlessModule
 	{
 
 		// remove_filter('the_excerpt', 'wpautop');
-		if ( is_admin() ) {
+		if ( !is_admin() ) {
 			add_filter('rest_post_dispatch',array($this,'_post_dispatch'),200,3);
+			// add_filter("the_content", array($this, "_filter_content"),20);
+			// add_filter("wpheadless/archive",array($this,"_headless_archive"),20,3);
 		}
-		add_filter("the_content", array($this, "_filter_content"),20);
-		add_filter("wpheadless/archive",array($this,"_headless_archive"),20,3);
-		add_filter("plugins_loaded", array($this, "load"),2000);
+		add_action("plugins_loaded", array($this, "load"),2000);
 
 	}
 
@@ -171,19 +190,24 @@ class WPHeadlessContent extends WPHeadlessModule
 
 
 
-				add_filter($cpt."_link", [ $this , "_headless_get_permalink"],100,2);
 
 
 				$this->console("Loading CPT [" . $cpt . "]");
 
-
-				if ($cpt == "attachment") {
-					$this->console("No aplicar en 'attachments'");
+				$cpts_no = array(
+					"attachment",
+					"wp_block",
+				);
+				if (in_array($cpt,$cpts_no)) {
+					$this->console("No aplicar en '".$cpt."");
 
 					continue;
 				}
 
-				if ( !is_admin() ) {
+				 if ( !is_admin() ) {
+					 add_filter($cpt."_link", [ $this , "_headless_get_permalink"],100,2);
+
+
 					register_rest_field(
 						$cpt,
 						'content',
@@ -205,18 +229,9 @@ class WPHeadlessContent extends WPHeadlessModule
 							'schema'          => null,
 						)
 					);
+					
 				}
-
-				$this->console("Loading CPT [" . $cpt . "][autor_info]");
-				register_rest_field(
-					$cpt,
-					'author_info',
-					array(
-						'get_callback'    => array($this, "content_render_author_objects"),
-						'update_callback' => null,
-						'schema'          => null,
-					)
-				);
+				
 
 				$this->console("Loading CPT [" . $cpt . "][tax_info]");
 				register_rest_field(
@@ -229,6 +244,16 @@ class WPHeadlessContent extends WPHeadlessModule
 					)
 				);
 
+				$this->console("Loading CPT [" . $cpt . "][autor_info]");
+				register_rest_field(
+					$cpt,
+					'author_info',
+					array(
+						'get_callback'    => array($this, "content_render_author_objects"),
+						'update_callback' => null,
+						'schema'          => null,
+					)
+				);
 
 				if ( apply_filters("wpheadless/rest/content/single/post_meta/include", true, array("post_type"=>$cpt)) ) {
 					$this->console("Loading CPT [" . $cpt . "][meta_info]");
@@ -242,6 +267,9 @@ class WPHeadlessContent extends WPHeadlessModule
 						)
 					);
 				}
+
+
+
 				$this->console("Loading CPT [" . $cpt . "][slices]");
 				register_rest_field(
 					$cpt,
@@ -252,6 +280,10 @@ class WPHeadlessContent extends WPHeadlessModule
 						'schema'          => null,
 					)
 				);
+
+
+
+
 
 
 				do_action("wpheadless/content/init", $cpt);

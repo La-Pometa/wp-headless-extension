@@ -37,13 +37,9 @@ class WPHeadlessSettings extends WPHeadlessModule
     function init_routes()
     {
 
-        if ( is_admin()) {
-            $this->console("Loading Route [settings] - Disabled by is_adinm() ");
-            return ;
-        }
- 
+
         $this->console("Loading Route [settings]");
-        register_rest_route('wp/v2', '/settings2/', array(
+        register_rest_route('wp/v2', '/settings/', array(
             'methods' => WP_REST_Server::READABLE,
             'callback' => array($this, "get_settings_response"),
             'permission_callback' => '__return_true',

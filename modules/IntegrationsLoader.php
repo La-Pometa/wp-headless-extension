@@ -59,7 +59,6 @@ class IntegrationsLoader
             
                 $this->integrationsAdmin[$integration_id]=new $integration_class();
                 $this->integrationsFile[$integration_id] = $integration_file;
-                add_action("init",$this->integrationsAdmin[$integration_id], "init");
             
             }
         }

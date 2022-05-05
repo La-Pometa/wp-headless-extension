@@ -3,10 +3,10 @@
 Plugin Name: Pometa Wordpress Headless API Extension
 Plugin URI: https://lapometa.com
 Description: A simple wordpress plugin to make your wordpress more headless capable
-Version: 0.0.8
+Version: 0.1.0
 Author: La Pometa
 Author URI: https://github.com/La-Pometa
-GitHub Plugin URI: La-Pometa/wp-headless-extension
+GitHub Plugin URI: La-Pometa/pometa-wp-headless-api-extension
 Primary Branch: main
 License: GPL2
 */
@@ -51,6 +51,7 @@ if (!class_exists('WP_Headless')) {
         private $params = array();
         private $is_api_request = false;
         private $clean_endpoints = false;
+        private $allow_duplicate_slugs = true;
         /**
          * Construct the plugin object
          */
@@ -98,6 +99,10 @@ if (!class_exists('WP_Headless')) {
             $this->_get_request_info();
             
 
+            add_action("plugins_loaded",[$this,"_get_request_start"]);
+
+            add_filter('dra_allow_rest_api', '__return_true');
+
             if ( $this->clean_endpoints ) {
 
                 
@@ -116,7 +121,7 @@ if (!class_exists('WP_Headless')) {
                 $this->console("boot","Registrar Administrador");
                 // Estic a l'administrador? Carregar ThemeSettings 
                 $this->Integrations->loadAdmin();
-                $this->IntegrationsAdmin = true;
+                $this->Integrations->loadAdminFilters();
 
             }
 
@@ -192,7 +197,9 @@ if (!class_exists('WP_Headless')) {
         function microtime() {
             return round(microtime(true)*1000,2);
         }
-
+        function _get_request_start() {
+            do_action("wpheadless/request/start");
+        }
         function _get_request_info() {
             $this->console("root","wpheadless/request/type/action->inici");
 
@@ -205,11 +212,16 @@ if (!class_exists('WP_Headless')) {
 
             $this->console("root","wpheadless/request/call ".$call);
 
+                       
             $this->call = explode("/",$call);
             $type = "single";
             if ( count($this->call) == 1 ) {
                 $type = "archive";
             }
+
+
+
+
             $this->set_request_type(apply_filters("wpheadless/request/type/filter",$type,$call));
             do_action("wpheadless/request/type/action",$this->get_request_type());
             $this->console("root","wpheadless/request/type/action '".$this->get_request_type()."'");
@@ -218,8 +230,27 @@ if (!class_exists('WP_Headless')) {
     }
 
 
+
+        function settings_allow_duplicate_slugs() {
+            return $this->settings("allow_duplicate_slugs");
+        }
+        function settings($params=false) {
+
+            $res = false;
+            if ( $params ) {
+                if ( $params == "allow_duplicate_slugs") {
+                    return $this->allow_duplicate_slugs;
+                }
+
+                return false;
+
+            }
+            return NULL;
+
+
+        }
+
         // Mostrar informació de Debug
-        // TODO: Integrair dins de la WP_Rest_Respnse
         function console($module_name,$string) {
             if ($this->debug) {
                 $time = $this->microtime(true) - $this->debug_start;
@@ -258,7 +289,7 @@ function wpheadless_archive_show_type_info($type) {
    // echo "<br> SET REQUEST TYPE['".$type."']";
 }
 
-add_action("wpheadless/request/type/action","wpheadless_archive_set_request_fields");
+//add_action("wpheadless/request/type/action","wpheadless_archive_set_request_fields");
 function wpheadless_archive_set_request_fields($type) {
         if ( $type == "archive" ) {
            $_GET["_fields"]=array("slug","content","excerpt","title","categories","featured_media","featured_source");
