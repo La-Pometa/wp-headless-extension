@@ -189,18 +189,18 @@ class WPHeadlessPolyLang extends WPHeadlessModule
     public function get_translations($object)
     {
         $translations = pll_get_post_translations($object['id']);
+        $item = array();
 
         return array_reduce($translations, function ($carry, $translation) {
 
             $post = get_post($translation);
-            $item = array(
-                'locale' => pll_get_post_language($translation),
-                // 'id' => $translation,
+            $thislang = pll_get_post_language($translation);
+            $carry[$thislang] = array(
                 'slug' => $post->post_name,
                 'title' => get_the_title($translation),
                 'url' => get_permalink($translation),
             );
-            array_push($carry, $item);
+            //array_push($carry, $item);
 
             return $carry;
         }, array());
