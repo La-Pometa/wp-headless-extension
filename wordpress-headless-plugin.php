@@ -6,7 +6,7 @@ Description: A simple wordpress plugin to make your wordpress more headless capa
 Version: 0.1.0
 Author: La Pometa
 Author URI: https://github.com/La-Pometa
-GitHub Plugin URI: La-Pometa/pometa-wp-headless-api-extension
+GitHub Plugin URI: La-Pometa/wp-headeless-extension
 Primary Branch: main
 License: GPL2
 */

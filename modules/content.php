@@ -133,6 +133,7 @@ class WPHeadlessContent extends WPHeadlessModule
 
 		 	$responseData = apply_filters("wpheadless/archive",array("data"=>$responseData),$object,$request);
 		 	$object->set_data($responseData);
+			// echo "<br> RESPONSE DATA: <pre>".print_r($responseData,true)."</pre>";
 			//  echo "<br> SERVER :<pre>".print_r($object,true)."</pre>";
 		}
 		return $object;
